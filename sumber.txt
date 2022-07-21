@@ -1,0 +1,10 @@
+https://www.syncfusion.com/blogs/post/create-stunning-circular-progress-bars-with-flutter-radial-gauge-part-2.aspx
+https://stackoverflow.com/questions/64917744/cannot-run-with-sound-null-safety-because-dependencies-dont-support-null-safety
+https://pub.dev/packages/whatsapp_share/install
+https://api.flutter.dev/flutter/dart-io/File-class.html
+
+https://stackoverflow.com/questions/64586829/flutter-app-show-white-screen-in-release-app-mode
+
+https://www.hiclipart.com/free-transparent-background-png-clipart-dfuqi/download
+https://www.pngwing.com/en/free-png-dkylu/download
+https://adamnain.medium.com/flutter-tips-ssl-pinning-in-flutter-f0c3f633769f

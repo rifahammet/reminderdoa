@@ -1,0 +1,30 @@
+{
+    "app_title" : "Flutter Demo Halaman Utama",
+    "username_login" : "Masukkan nama user anda...",
+    "password_login" : "Masukkan password anda...",
+    "enter" : "Masukkan ",
+    "here"  : "disini",
+    "username" : "Nama User",
+    "password" : "Password",
+    "signup" : "Pendaftaran User",
+    "email" :   "Alamat Email",
+    "mobile" : "Nomor Handphone",
+    "birthdate" : "Tanggal Lahir",
+    "name" : "Nama Lengkap",
+    "province" : "Propinsi",
+    "city" : "Kota",
+    "daftar" : "Daftar"
+
+
+
+
+
+    
+
+
+
+
+
+
+
+}
