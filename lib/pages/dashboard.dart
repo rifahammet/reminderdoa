@@ -15,6 +15,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geocoding/geocoding.dart' as geo;
+import 'package:location/location.dart';
+// import 'package:geocoding/geocoding.dart';
+// import 'package:geolocator/geolocator.dart';
+
 import 'package:path/path.dart';
 import 'package:http/http.dart' as http;
 import 'package:doa/pages/Request-penarikan-dana/request-penarikan-dana.dart';
@@ -58,14 +63,48 @@ import 'package:path_provider/path_provider.dart';
 // ignore: import_of_legacy_library_into_null_safe
 //import 'package:sticky_headers/sticky_headers/widget.dart';
 import 'package:sweetalert/sweetalert.dart';
+// import 'package:workmanager/workmanager.dart';
 
 String? selectedNotificationPayload;
+// late Position _currentPosition;
+// late String _currentAddress;
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'high_importance_channel', // id
   'High Importance Notifications', // title
   'Notofication Reminder Doa', // Description
   importance: Importance.high,
 );
+// void callbackDispatcher() {
+//   Workmanager().executeTask((task, inputData) async {
+//     _getCurrentLocation();
+//     return Future.value(true);
+//   });
+// }
+
+// _getCurrentLocation() {
+//   Geolocator.getCurrentPosition(
+//           desiredAccuracy: LocationAccuracy.best,
+//           forceAndroidLocationManager: true)
+//       .then((Position position) {
+//     _currentPosition = position;
+//     _getAddressFromLatLng();
+//   }).catchError((e) {
+//     print(e);
+//   });
+// }
+
+// _getAddressFromLatLng() async {
+//   try {
+//     List<Placemark> placemarks = await placemarkFromCoordinates(
+//         _currentPosition.latitude, _currentPosition.longitude);
+
+//     Placemark place = placemarks[0];
+
+//     print("${place.locality}, ${place.postalCode}, ${place.country}");
+//   } catch (e) {
+//     print(e);
+//   }
+// }
 
 // ignore: use_key_in_widget_constructors
 class DashboardPage extends StatefulWidget {
@@ -75,6 +114,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   late final FirebaseMessaging _messaging;
+
   PushNotification? _notificationInfo;
 
   List<String> listHeader = ['Menus'];
@@ -167,6 +207,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   void initState() {
+    _initLocationService();
+    // Workmanager().initialize(
+    //     callbackDispatcher, // The top level function, aka callbackDispatcher
+    //     isInDebugMode:
+    //         true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+    //     );
+    // Workmanager().registerOneOffTask("task-Location", "Location");
     registerNotification();
     isOwner = Prefs.getString("user_type").toString().toLowerCase() == "owner"
         ? true
@@ -228,6 +275,72 @@ class _DashboardPageState extends State<DashboardPage> {
     super.dispose();
   }
 
+  _getAddressFromLatLng(_currentPosition) async {
+    try {
+      List<geo.Placemark> placemarks = await geo.placemarkFromCoordinates(
+          _currentPosition.latitude, _currentPosition.longitude);
+
+      geo.Placemark place = placemarks[0];
+      print(
+          "${place.subAdministrativeArea}, ${place.postalCode}, ${place.country}");
+      String kota = place.subAdministrativeArea
+          .replaceAll("Kabupaten", "kab.")
+          .toUpperCase();
+      if (kota != Prefs.getString("kota_nama")) {
+        var data = <dynamic, dynamic>{"kota_nama": kota};
+        ApiUtilities auth = ApiUtilities();
+        final dataDoa =
+            await auth.getGlobalParam(namaApi: "kotas", where: data);
+        bool isSukses = dataDoa["isSuccess"] as bool;
+        if (isSukses) {
+          var record = dataDoa["data"]["data"][0];
+          setState(() {
+            Prefs.setString("kota_nama", kota);
+            Prefs.setString("kota_kode", record['api_id']);
+
+            // newDataSholat = snapshot.ge;
+            // print(newDataSholat);
+          });
+
+          dynamic newJadwal = await getJadwalSholat();
+
+          setState(() {
+            newDataSholat = newJadwal['data'];
+            Prefs.setString("kota_nama", kota);
+            Prefs.setString("kota_kode", record['api_id']);            
+          });
+        }
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future _initLocationService() async {
+    var location = Location();
+
+    if (!await location.serviceEnabled()) {
+      if (!await location.requestService()) {
+        return;
+      }
+    }
+
+    var permission = await location.hasPermission();
+    if (permission == PermissionStatus.DENIED) {
+      permission = await location.requestPermission();
+      if (permission != PermissionStatus.GRANTED) {
+        return;
+      }
+    }
+
+    var loc = await location.getLocation();
+    print("${loc.latitude} ${loc.longitude}");
+    _getAddressFromLatLng(loc);
+    location.onLocationChanged().listen((LocationData loc) {
+      _getAddressFromLatLng(loc);
+    });
+  }
+
   void registerNotification() async {
     WidgetsFlutterBinding.ensureInitialized();
     // 1. Initialize the Firebase app
@@ -264,7 +377,7 @@ class _DashboardPageState extends State<DashboardPage> {
     // if (!isPertamaSholat) {
     //   return newDataSholat;
     // }
-
+    print(Prefs.getString('kota_nama'));
     var url = Uri.parse("https://api.myquran.com/v1/sholat/jadwal/" +
         Prefs.getString('kota_kode') +
         "/" +
@@ -381,6 +494,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     if (isFirst) {
       NotificationService.initialize(context);
+
       isFirst = false;
     }
     return WillPopScope(
@@ -825,7 +939,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
                 Text(
                   "Untuk wilayah " +
-                      Prefs.getString('kota_nama') +
+                      Prefs.getString("kota_nama") +
                       " dan sekitarnya",
                   style: TextStyle(color: Colors.yellow),
                 ),

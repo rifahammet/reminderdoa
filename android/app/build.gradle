@@ -84,7 +84,8 @@ android {
         //     minifyEnabled false
         //     useProguard false            
         // }
-        release {
+        debug {
+            // minifyEnabled true
             /// DEBUG:
             signingConfig signingConfigs.debug
 
