@@ -112,7 +112,7 @@ class ApiUtilities {
     */
     //print('kondisi=' + datajson.toString());
     try {
-      print(Api.BASE_URL + namaApi);
+      //print(Api.BASE_URL + namaApi);
       var resAccount = await http.post(Uri.parse(Api.BASE_URL + namaApi),
           headers: {
             'Authorization': 'Bearer $token',
@@ -140,7 +140,7 @@ class ApiUtilities {
         'data': res //masalah tadi lemparan disininya res["data"]
       };
     } catch (err) {
-      print(err.toString());
+      //print(err.toString());
       if (err.toString().contains('SocketException: Failed host lookup')) {
         return {
           'kode': 500,
@@ -190,7 +190,7 @@ class ApiUtilities {
     }
     //print('kondisi=' + datajson.toString());
     try {
-      var resAccount = await http.post(Uri.parse( Api.BATCH_URL + namaApi),
+      var resAccount = await http.post(Uri.parse(Api.BATCH_URL + namaApi),
           headers: {
             'Authorization': 'Bearer $token',
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -257,7 +257,7 @@ class ApiUtilities {
         datajson = {"where": json.encode(where)};
       }
     }
-    //print('kondisi=' + datajson.toString());
+    
     try {
       var resAccount = await http.post(Uri.parse(Api.BASE_URL + namaApi),
           headers: {
@@ -265,6 +265,7 @@ class ApiUtilities {
             'Content-Type': 'application/x-www-form-urlencoded'
           },
           body: datajson);
+      // print(resAccount.body);
       var res = json.decode(resAccount.body);
       var isSukses = false;
       if (res['success'] == null) {
@@ -330,10 +331,10 @@ class ApiUtilities {
           },
           body: datajson);
       var res = json.decode(resAccount.body);
-      print('debug =' +
-          resAccount.statusCode.toString() +
-          ' ' +
-          resAccount.body.toString());
+      // print('debug =' +
+      //     resAccount.statusCode.toString() +
+      //     ' ' +
+      //     resAccount.body.toString());
       var isSukses = false;
       if (res['success'] == null) {
         isSukses = false;
@@ -374,7 +375,7 @@ class ApiUtilities {
               'Cannot connect to server, please contact your administator'
         };
       }
-      print(err.toString());
+      //print(err.toString());
       return {
         'kode': 505,
         'isSuccess': false,
@@ -397,7 +398,6 @@ class ApiUtilities {
     // print(datajson.toString());
     var token = Api.TOKEN.toString();
     try {
-      print('datajson='+datajson.toString());
       var resAccount = await http.post(Uri.parse(Api.BATCH_URL),
           headers: {
             'Authorization': 'Bearer $token',
@@ -406,10 +406,10 @@ class ApiUtilities {
           body: datajson);
       // print("error code : " + resAccount.statusCode.toString());
       var res = json.decode(resAccount.body);
-      print('debug =' +
-          resAccount.statusCode.toString() +
-          ' ' +
-          resAccount.body.toString());
+      // print('debug =' +
+      //     resAccount.statusCode.toString() +
+      //     ' ' +
+      //     resAccount.body.toString());
       var isSukses = false;
       if (res['success'] == null) {
         isSukses = false;
@@ -425,7 +425,7 @@ class ApiUtilities {
         'error_message': res['error_description']
       };
     } catch (err) {
-      print('error= '+ err.toString());
+      //print('error= ' + err.toString());
       if (err.toString().contains('SocketException: Failed host lookup')) {
         return {
           'kode': 500,
@@ -490,17 +490,17 @@ class ApiUtilities {
     // print(datajson.toString());
     var token = Api.TOKEN.toString();
     try {
-      var resAccount = await http.post(Uri.parse( Api.BASE_URL + namaApi),
+      var resAccount = await http.post(Uri.parse(Api.BASE_URL + namaApi),
           headers: {
             'Authorization': 'Bearer $token',
             'Content-Type': 'application/x-www-form-urlencoded'
           },
           body: datajson);
       var res = json.decode(resAccount.body);
-      print('debug =' +
-          resAccount.statusCode.toString() +
-          ' ' +
-          resAccount.body.toString());
+      // print('debug =' +
+      //     resAccount.statusCode.toString() +
+      //     ' ' +
+      //     resAccount.body.toString());
       var isSukses = false;
       if (res['success'] == null) {
         isSukses = false;
@@ -574,7 +574,7 @@ class ApiUtilities {
       };
     }
 
-    print(datajson.toString());
+    //print(datajson.toString());
     var token = Api.TOKEN.toString();
     try {
       var resAccount = await http.post(Uri.parse(Api.BATCH_URL),
@@ -584,10 +584,10 @@ class ApiUtilities {
           },
           body: datajson);
       var res = json.decode(resAccount.body);
-      print('debug =' +
-          resAccount.statusCode.toString() +
-          ' ' +
-          resAccount.body.toString());
+      // print('debug =' +
+      //     resAccount.statusCode.toString() +
+      //     ' ' +
+      //     resAccount.body.toString());
       var isSukses = false;
       if (res['success'] == null) {
         isSukses = false;
@@ -661,20 +661,20 @@ class ApiUtilities {
       };
     }
 
-    print(datajson.toString());
+    //print(datajson.toString());
     var token = Api.TOKEN.toString();
     try {
-      var resAccount = await http.post(Uri.parse( Api.BASE_URL + namaApi),
+      var resAccount = await http.post(Uri.parse(Api.BASE_URL + namaApi),
           headers: {
             'Authorization': 'Bearer $token',
             'Content-Type': 'application/x-www-form-urlencoded'
           },
           body: datajson);
       var res = json.decode(resAccount.body);
-      print('debug =' +
-          resAccount.statusCode.toString() +
-          ' ' +
-          resAccount.body.toString());
+      // print('debug =' +
+      //     resAccount.statusCode.toString() +
+      //     ' ' +
+      //     resAccount.body.toString());
       var isSukses = false;
       if (res['success'] == null) {
         isSukses = false;
@@ -748,20 +748,20 @@ class ApiUtilities {
       };
     }
 
-    print(datajson.toString());
+    //print(datajson.toString());
     var token = Api.TOKEN.toString();
     try {
-      var resAccount = await http.post(Uri.parse( Api.BATCH_URL),
+      var resAccount = await http.post(Uri.parse(Api.BATCH_URL),
           headers: {
             'Authorization': 'Bearer $token',
             'Content-Type': 'application/x-www-form-urlencoded'
           },
           body: datajson);
       var res = json.decode(resAccount.body);
-      print('debug =' +
-          resAccount.statusCode.toString() +
-          ' ' +
-          resAccount.body.toString());
+      // print('debug =' +
+      //     resAccount.statusCode.toString() +
+      //     ' ' +
+      //     resAccount.body.toString());
       var isSukses = false;
       if (res['success'] == null) {
         isSukses = false;
@@ -888,7 +888,7 @@ class ApiUtilities {
       isCustom = false,
       callBack,
       prefix = "",
-      caption ="",
+      caption = "",
       isSingleDelete = false,
       isMoreHide = false}) async {
     FocusScope.of(context).requestFocus(FocusNode());
@@ -896,7 +896,7 @@ class ApiUtilities {
         ? await updateData(data, namaAPI, where: where)
         : await saveNewData(data, namaAPI, prefix);
     // await pr.hide();
-    print('result=' + result.toString());
+    //print('result=' + result.toString());
     if (result['kode'] == 200) {
       if (result['isSuccess']) {
         if (isCustom) {
@@ -904,11 +904,15 @@ class ApiUtilities {
         } else {
           SweetAlert.show(
             context,
-            subtitle: caption != "" ? caption : isEdit ? "Data has been updated" : "Data has been saved",
+            subtitle: caption != ""
+                ? caption
+                : isEdit
+                    ? "Data has been updated"
+                    : "Data has been saved",
             style: SweetAlertStyle.loadingSuccess,
           );
           Future.delayed(new Duration(seconds: 3), () {
-            setState(() {});
+            // setState(() {});
             Navigator.pop(context);
             if (isMoreHide) {
               Navigator.pop(context);
@@ -916,7 +920,6 @@ class ApiUtilities {
             if (!isSingleDelete) {
               Navigator.pop(context, true);
             }
-            
           });
         }
         // Future.delayed(new Duration(seconds: 4), () {
@@ -968,7 +971,7 @@ class ApiUtilities {
           Future.delayed(new Duration(seconds: 3), () {
             setState(() {});
             Navigator.pop(context);
-            if(!isSingleDelete){
+            if (!isSingleDelete) {
               Navigator.pop(context, true);
             }
           });
@@ -1001,7 +1004,7 @@ class ApiUtilities {
   Future<dynamic> getDataBatch(data) async {
     var token = Api.TOKEN.toString();
     var datajson = {"data": json.encode(data)};
-    print(datajson.toString());
+    //print(datajson.toString());
     //print('kondisi=' + datajson.toString());
     try {
       var resAccount = await http.post(Uri.parse(Api.BATCH_URL),

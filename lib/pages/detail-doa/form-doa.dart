@@ -35,7 +35,6 @@ class DoaDialog {
   final txtWaktuSholatController = TextEditingController();
   final txtWaktuTanggalController = TextEditingController();
   final txtWaktuBukaController = TextEditingController();
-  final txtWaktuSahurController = TextEditingController();
   final txtWaktuPagiController = TextEditingController();
   final txtWaktuSiangController = TextEditingController();
   final txtWaktuMalamController = TextEditingController();
@@ -73,8 +72,8 @@ class DoaDialog {
 
   /* checkbox */
   bool cboSholat = false;
-  bool cboBuka = false;
-  bool cboSahur = false;
+
+  bool cboImsak = false;
   bool cboTanggal = false;
   bool cboPagi = false;
   bool cboSiang = false;
@@ -99,9 +98,23 @@ class DoaDialog {
 
     //              firstLoad = false;
     // }
+    var vData;
     if (isEdit) {
-      final vData = await ApiUtilities()
-          .getGlobalParamNoLimit(namaApi: "masterdoa", where: {"id": data});
+      vData = await ApiUtilities().getGlobalParamNoLimit(
+          namaApi: "masterdoa",
+          where: {
+            "user_id": Prefs.getInt("userId"),
+            "id": data,
+            "isfavorit": 1
+          });
+      bool isSukses = vData["isSuccess"] as bool;
+      if (!isSukses) {
+        vData = await ApiUtilities().getGlobalParamNoLimit(
+          namaApi: "masterdoa",
+          where: {
+            "id": data
+          });        
+      }
       return vData["data"]["data"][0];
     } else {
       return [];
@@ -148,14 +161,6 @@ class DoaDialog {
         // }
         callBackTimeSholat(data) {
           txtWaktuSholatController.text = data;
-        }
-
-        callBackTimeBuka(data) {
-          txtWaktuBukaController.text = data;
-        }
-
-        callBackTimeSahur(data) {
-          txtWaktuSahurController.text = data;
         }
 
         callBackTimeTanggal(data) {
@@ -285,22 +290,13 @@ class DoaDialog {
               "isjadwal_sholat": 1
             });
           }
-          if (cboBuka) {
+
+          if (cboImsak) {
             arrData.add({
               "user_id": userID,
               "doa_id": data["id"],
               "isRamadhan": 1,
-              "waktu": "Buka",
-              "time": txtWaktuBukaController.text
-            });
-          }
-          if (cboSahur) {
-            arrData.add({
-              "user_id": userID,
-              "doa_id": data["id"],
-              "isRamadhan": 1,
-              "waktu": "Sahur",
-              "time": txtWaktuSahurController.text
+              "waktu": "Imsak"
             });
           }
           if (cboTanggal) {
@@ -435,6 +431,7 @@ class DoaDialog {
             });
           }
 
+          //print(dataSave);
           ApiUtilities().saveUpdateBatchData(
               context: context,
               data: dataSave,
@@ -446,8 +443,9 @@ class DoaDialog {
 
         /* call back */
 
-        return Form(
+        return WillPopScope(
             key: _key,
+            onWillPop: () async => false,
             child: Scaffold(
                 resizeToAvoidBottomInset: true,
                 appBar: AppBar(
@@ -461,741 +459,724 @@ class DoaDialog {
                   ),
                   actions: [
                     Visibility(
-                      visible: !Prefs.getBool("isExpired"),
-                      child: 
-                    IconButton(
-                      icon: Icon(
-                        Icons.settings,
-                        color: Colors.yellow,
-                      ),
-                      onPressed: () async {
-                        // do something
-                        showDialogWidget(data, setState) {
-                          // txtBaseUrlController.text = Api.BASE_URL;
-                          // txtBatchUrlController.text = Api.BATCH_URL;
-                          print("isFirstLoad=" + firstLoad.toString());
-                          if (firstLoad) {
-                            setState(() {
-                              firstLoad = false;
-                            });
-                            txtTanggalTransaksiController.text = formatDate(
-                                DateTime.now(), [dd, '-', mm, '-', yyyy]);
-                            tanggalTransaksi = Fungsi().fmtDateTimeYearNow();
-                            txtWaktuSholatController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuTanggalController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuBukaController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuSahurController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuPagiController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuSiangController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuMalamController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuSeninController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuSelasaController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuRabuController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuKamisController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuJumatController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuSabtuController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            txtWaktuMingguController.text =
-                                formatDate(DateTime.now(), [HH, ':', nn]);
-                            if (data["data"].length > 0) {
-                              data["data"].forEach((dynamic vdata) {
-                                if (int.parse(vdata['isjadwal_sholat']) == 1) {
-                                  setState(() {
-                                    cboSholat = true;
+                        visible: !Prefs.getBool("isExpired"),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.settings,
+                            color: Colors.yellow,
+                          ),
+                          onPressed: () async {
+                            // do something
+                            showDialogWidget(data, setState) {
+                              // txtBaseUrlController.text = Api.BASE_URL;
+                              // txtBatchUrlController.text = Api.BATCH_URL;
+                              print("isFirstLoad=" + firstLoad.toString());
+                              if (firstLoad) {
+                                setState(() {
+                                  firstLoad = false;
+                                });
+                                txtTanggalTransaksiController.text = formatDate(
+                                    DateTime.now(), [dd, '-', mm, '-', yyyy]);
+                                tanggalTransaksi =
+                                    Fungsi().fmtDateTimeYearNow();
+                                txtWaktuSholatController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuTanggalController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuPagiController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuSiangController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuMalamController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuSeninController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuSelasaController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuRabuController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuKamisController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuJumatController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuSabtuController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                txtWaktuMingguController.text =
+                                    formatDate(DateTime.now(), [HH, ':', nn]);
+                                if (data["data"].length > 0) {
+                                  data["data"].forEach((dynamic vdata) {
+                                    if (int.parse(vdata['isjadwal_sholat']) ==
+                                        1) {
+                                      setState(() {
+                                        cboSholat = true;
+                                      });
+                                    }
+                                    if (int.parse(vdata['isRamadhan']) == 1) {
+                                      setState(() {
+                                        cboImsak = true;
+                                      });
+                                    }
+                                    if (int.parse(vdata['isByDate']) == 1) {
+                                      setState(() {
+                                        cboTanggal = true;
+                                        txtTanggalTransaksiController.text =
+                                            formatDate(
+                                                DateTime.parse(
+                                                    vdata["tanggal"]),
+                                                [dd, '-', mm, '-', yyyy]);
+                                        tanggalTransaksi = vdata["tanggal"];
+                                        txtWaktuTanggalController.text =
+                                            vdata['time']
+                                                .toString()
+                                                .substring(0, 5);
+                                      });
+                                    }
+
+                                    if (int.parse(vdata['isDaily']) == 1) {
+                                      if (vdata['day'] == "Senin") {
+                                        setState(() {
+                                          cboSenin = true;
+                                          txtWaktuSeninController.text =
+                                              vdata['time']
+                                                  .toString()
+                                                  .substring(0, 5);
+                                        });
+                                      }
+                                      if (vdata['day'] == "Selasa") {
+                                        setState(() {
+                                          cboSelasa = true;
+                                          txtWaktuSelasaController.text =
+                                              vdata['time']
+                                                  .toString()
+                                                  .substring(0, 5);
+                                        });
+                                      }
+                                      if (vdata['day'] == "Rabu") {
+                                        setState(() {
+                                          cboRabu = true;
+                                          txtWaktuRabuController.text =
+                                              vdata['time']
+                                                  .toString()
+                                                  .substring(0, 5);
+                                        });
+                                      }
+                                      if (vdata['day'] == "Kamis") {
+                                        setState(() {
+                                          cboKamis = true;
+                                          txtWaktuKamisController.text =
+                                              vdata['time']
+                                                  .toString()
+                                                  .substring(0, 5);
+                                        });
+                                      }
+                                      if (vdata['day'] == "Jumat") {
+                                        setState(() {
+                                          cboJumat = true;
+                                          txtWaktuJumatController.text =
+                                              vdata['time']
+                                                  .toString()
+                                                  .substring(0, 5);
+                                        });
+                                      }
+                                      if (vdata['day'] == "Sabtu") {
+                                        setState(() {
+                                          cboSabtu = true;
+                                          txtWaktuSabtuController.text =
+                                              vdata['time']
+                                                  .toString()
+                                                  .substring(0, 5);
+                                        });
+                                      }
+                                      if (vdata['day'] == "Minggu") {
+                                        setState(() {
+                                          cboMinggu = true;
+                                          txtWaktuMingguController.text =
+                                              vdata['time']
+                                                  .toString()
+                                                  .substring(0, 5);
+                                        });
+                                      }
+                                    }
+                                    if (int.parse(vdata['isWaktu']) == 1) {
+                                      if (vdata['waktu'] == "Pagi") {
+                                        setState(() {
+                                          cboPagi = true;
+                                          txtWaktuPagiController.text =
+                                              vdata['time']
+                                                  .toString()
+                                                  .substring(0, 5);
+                                        });
+                                      }
+                                      if (vdata['waktu'] == "Siang") {
+                                        setState(() {
+                                          cboSiang = true;
+                                          txtWaktuSiangController.text =
+                                              vdata['time']
+                                                  .toString()
+                                                  .substring(0, 5);
+                                        });
+                                      }
+                                      if (vdata['waktu'] == "Malam") {
+                                        setState(() {
+                                          cboMalam = true;
+                                          txtWaktuMalamController.text =
+                                              vdata['time']
+                                                  .toString()
+                                                  .substring(0, 5);
+                                        });
+                                      }
+                                    }
                                   });
                                 }
-                                if (int.parse(vdata['isByDate']) == 1) {
+                              }
+
+                              displayTanggalTransaksi(formatDate, formatYear) {
+                                setState(() {
+                                  tanggalTransaksi = formatYear.toString();
+                                  txtTanggalTransaksiController.text =
+                                      formatDate.toString();
+                                  print('tanggal=' + formatDate.toString());
+                                });
+                              }
+
+                              cbOnChangeSholat(val) {
+                                setState(() {
+                                  cboSholat = val;
+                                });
+                              }
+
+                              cbOnChangeImsak(val) {
+                                setState(() {
+                                  cboImsak = val;
+                                });
+                              }
+
+                              cbOnChangeTanggal(val) {
+                                setState(() {
+                                  cboTanggal = val;
+                                });
+                              }
+
+                              cbOnChangePagi(val) {
+                                setState(() {
+                                  cboPagi = val;
+                                });
+                              }
+
+                              cbOnChangeSiang(val) {
+                                setState(() {
+                                  cboSiang = val;
+                                });
+                              }
+
+                              cbOnChangeMalam(val) {
+                                setState(() {
+                                  cboMalam = val;
+                                });
+                              }
+
+                              cbOnChangeSenin(val) {
+                                setState(() {
+                                  cboSenin = val;
+                                });
+                              }
+
+                              cbOnChangeSelasa(val) {
+                                setState(() {
+                                  cboSelasa = val;
+                                });
+                              }
+
+                              cbOnChangeRabu(val) {
+                                setState(() {
+                                  cboRabu = val;
+                                });
+                              }
+
+                              cbOnChangeKamis(val) {
+                                setState(() {
+                                  cboKamis = val;
+                                });
+                              }
+
+                              cbOnChangeJumat(val) {
+                                setState(() {
+                                  cboJumat = val;
+                                });
+                              }
+
+                              cbOnChangeSabtu(val) {
+                                setState(() {
+                                  cboSabtu = val;
+                                });
+                              }
+
+                              cbOnChangeMinggu(val) {
+                                setState(() {
+                                  cboMinggu = val;
+                                });
+                              }
+
+                              callBackSholat(value) {
+                                if (vExpandableMenu != "sholat") {
                                   setState(() {
-                                    cboTanggal = true;
-                                    txtTanggalTransaksiController.text =
-                                        formatDate(
-                                            DateTime.parse(vdata["tanggal"]),
-                                            [dd, '-', mm, '-', yyyy]);
-                                    tanggalTransaksi = vdata["tanggal"];
-                                    txtWaktuTanggalController.text =
-                                        vdata['time']
-                                            .toString()
-                                            .substring(0, 5);
+                                    vExpandableMenu = "sholat";
+                                    isDisplaySholat = value;
+                                    isDisplayTanggal = !value;
+                                    isDisplayRamadhan = !value;
+                                    isDisplayBatasWaktu = !value;
+                                    isDisplayHarian = !value;
                                   });
                                 }
-                                if (int.parse(vdata['isRamadhan']) == 1) {
-                                  if (vdata['waktu'] == "Buka") {
-                                    setState(() {
-                                      cboBuka = true;
-                                      txtWaktuBukaController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                  if (vdata['waktu'] == "Sahur") {
-                                    setState(() {
-                                      cboSahur = true;
-                                      txtWaktuSahurController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                }
-                                if (int.parse(vdata['isDaily']) == 1) {
-                                  if (vdata['day'] == "Senin") {
-                                    setState(() {
-                                      cboSenin = true;
-                                      txtWaktuSeninController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                  if (vdata['day'] == "Selasa") {
-                                    setState(() {
-                                      cboSelasa = true;
-                                      txtWaktuSelasaController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                  if (vdata['day'] == "Rabu") {
-                                    setState(() {
-                                      cboRabu = true;
-                                      txtWaktuRabuController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                  if (vdata['day'] == "Kamis") {
-                                    setState(() {
-                                      cboKamis = true;
-                                      txtWaktuKamisController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                  if (vdata['day'] == "jumat") {
-                                    setState(() {
-                                      cboJumat = true;
-                                      txtWaktuJumatController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                  if (vdata['day'] == "Sabtu") {
-                                    setState(() {
-                                      cboSabtu = true;
-                                      txtWaktuSabtuController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                  if (vdata['day'] == "Minggu") {
-                                    setState(() {
-                                      cboMinggu = true;
-                                      txtWaktuMingguController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                }
-                                if (int.parse(vdata['isWaktu']) == 1) {
-                                  if (vdata['waktu'] == "Pagi") {
-                                    setState(() {
-                                      cboPagi = true;
-                                      txtWaktuPagiController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                  if (vdata['waktu'] == "Siang") {
-                                    setState(() {
-                                      cboSiang = true;
-                                      txtWaktuSiangController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                  if (vdata['waktu'] == "Malam") {
-                                    setState(() {
-                                      cboMalam = true;
-                                      txtWaktuMalamController.text =
-                                          vdata['time']
-                                              .toString()
-                                              .substring(0, 5);
-                                    });
-                                  }
-                                }
-                              });
-                            }
-                          }
+                              }
 
-                          displayTanggalTransaksi(formatDate, formatYear) {
-                            setState(() {
-                              tanggalTransaksi = formatYear.toString();
-                              txtTanggalTransaksiController.text =
-                                  formatDate.toString();
-                              print('tanggal=' + formatDate.toString());
-                            });
-                          }
-
-                          cbOnChangeSholat(val) {
-                            setState(() {
-                              cboSholat = val;
-                            });
-                          }
-
-                          cbOnChangeBuka(val) {
-                            setState(() {
-                              cboBuka = val;
-                            });
-                          }
-
-                          cbOnChangeSahur(val) {
-                            setState(() {
-                              cboSahur = val;
-                            });
-                          }
-
-                          cbOnChangeTanggal(val) {
-                            setState(() {
-                              cboTanggal = val;
-                            });
-                          }
-
-                          cbOnChangePagi(val) {
-                            setState(() {
-                              cboPagi = val;
-                            });
-                          }
-
-                          cbOnChangeSiang(val) {
-                            setState(() {
-                              cboSiang = val;
-                            });
-                          }
-
-                          cbOnChangeMalam(val) {
-                            setState(() {
-                              cboMalam = val;
-                            });
-                          }
-
-                          cbOnChangeSenin(val) {
-                            setState(() {
-                              cboSenin = val;
-                            });
-                          }
-
-                          cbOnChangeSelasa(val) {
-                            setState(() {
-                              cboSelasa = val;
-                            });
-                          }
-
-                          cbOnChangeRabu(val) {
-                            setState(() {
-                              cboRabu = val;
-                            });
-                          }
-
-                          cbOnChangeKamis(val) {
-                            setState(() {
-                              cboKamis = val;
-                            });
-                          }
-
-                          cbOnChangeJumat(val) {
-                            setState(() {
-                              cboJumat = val;
-                            });
-                          }
-
-                          cbOnChangeSabtu(val) {
-                            setState(() {
-                              cboSabtu = val;
-                            });
-                          }
-
-                          cbOnChangeMinggu(val) {
-                            setState(() {
-                              cboMinggu = val;
-                            });
-                          }
-
-                          callBackSholat(value) {
-                            if (vExpandableMenu != "sholat") {
-                              setState(() {
-                                vExpandableMenu = "sholat";
-                                isDisplaySholat = value;
-                                isDisplayTanggal = !value;
-                                isDisplayRamadhan = !value;
-                                isDisplayBatasWaktu = !value;
-                                isDisplayHarian = !value;
-                              });
-                            }
-                          }
-
-                          isiWidgetSholat() {
-                            Widget wgs = Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  CheckBox().checkBox(
-                                      lebars: 200,
-                                      checkBoxLabel: "sholat 5 waktu",
-                                      boolValue: cboSholat,
-                                      cbOnChage: cbOnChangeSholat),
-                                ]);
-                            return wgs;
-                          }
-
-                          callBackTanggal(value) {
-                            if (vExpandableMenu != "tanggal") {
-                              setState(() {
-                                vExpandableMenu = "tanggal";
-                                isDisplayTanggal = value;
-                                isDisplaySholat = !value;
-                                isDisplayRamadhan = !value;
-                                isDisplayBatasWaktu = !value;
-                                isDisplayHarian = !value;
-                              });
-                            }
-                          }
-
-                          isiWidgetTanggal() {
-                            Widget wgs = Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 15),
-                                    child: 
-                                  Row(
-                                    children: [
-                                      
+                              isiWidgetSholat() {
+                                Widget wgs = Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
                                       CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Tanggal",
-                                          boolValue: cboTanggal,
-                                          cbOnChage: cbOnChangeTanggal,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: Column(children: [
- DatePicker().datePickerBorder(
-                                        context,
-                                        textController:
-                                            txtTanggalTransaksiController,
-                                        label: "Tanggal",
-                                        fungsiCallback: displayTanggalTransaksi,
-                                        formatDate: tanggalTransaksi,
+                                          lebars: 200,
+                                          checkBoxLabel: "sholat 5 waktu",
+                                          boolValue: cboSholat,
+                                          cbOnChage: cbOnChangeSholat),
+                                    ]);
+                                return wgs;
+                              }
+
+                              callBackTanggal(value) {
+                                if (vExpandableMenu != "tanggal") {
+                                  setState(() {
+                                    vExpandableMenu = "tanggal";
+                                    isDisplayTanggal = value;
+                                    isDisplaySholat = !value;
+                                    isDisplayRamadhan = !value;
+                                    isDisplayBatasWaktu = !value;
+                                    isDisplayHarian = !value;
+                                  });
+                                }
+                              }
+
+                              isiWidgetTanggal() {
+                                Widget wgs = Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Padding(
+                                          padding: EdgeInsets.only(top: 15),
+                                          child: Row(
+                                            children: [
+                                              CheckBox().checkBox(
+                                                  lebars: 100,
+                                                  checkBoxLabel: "Tanggal",
+                                                  boolValue: cboTanggal,
+                                                  cbOnChage: cbOnChangeTanggal,
+                                                  isUpDown: true),
+                                              Expanded(
+                                                  child: Column(
+                                                children: [
+                                                  DatePicker().datePickerBorder(
+                                                    context,
+                                                    textController:
+                                                        txtTanggalTransaksiController,
+                                                    label: "Tanggal",
+                                                    fungsiCallback:
+                                                        displayTanggalTransaksi,
+                                                    formatDate:
+                                                        tanggalTransaksi,
+                                                  ),
+                                                  TimePicker().datePickerBorder(
+                                                      context,
+                                                      label: "Waktu",
+                                                      textController:
+                                                          txtWaktuTanggalController,
+                                                      fungsiCallback:
+                                                          callBackTimeTanggal)
+                                                ],
+                                              )),
+                                            ],
+                                          ))
+                                    ]);
+                                return wgs;
+                              }
+
+                              callBackRamadhan(value) {
+                                if (vExpandableMenu != "ramadhan") {
+                                  setState(() {
+                                    vExpandableMenu = "ramadhan";
+                                    isDisplayRamadhan = value;
+                                    isDisplaySholat = !value;
+                                    isDisplayBatasWaktu = !value;
+                                    isDisplayHarian = !value;
+                                    isDisplayTanggal = !value;
+                                  });
+                                }
+                              }
+
+                              isiWidgetRamadhan() {
+                                Widget wgs = Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      CheckBox().checkBox(
+                                          lebars: 200,
+                                          checkBoxLabel: "Imsak",
+                                          boolValue: cboImsak,
+                                          cbOnChage: cbOnChangeImsak),
+                                    ]);
+                                return wgs;
+                                // Widget wgs = Column(
+                                //     crossAxisAlignment:
+                                //         CrossAxisAlignment.start,
+                                //     children: <Widget>[
+                                //       Padding(
+                                //           padding: EdgeInsets.only(top: 15),
+                                //           child: Row(
+                                //             children: [
+                                //               CheckBox().checkBox(
+                                //                   lebars: 100,
+                                //                   checkBoxLabel: "Imsak",
+                                //                   boolValue: cboImsak,
+                                //                   cbOnChage: cbOnChangeImsak,
+                                //                   isUpDown: true),
+                                //               Expanded(
+                                //                   child: TimePicker()
+                                //                       .datePickerBorder(context,
+                                //                           label: "Waktu",
+                                //                           textController:
+                                //                               txtWaktuImsakController,
+                                //                           fungsiCallback:
+                                //                               callBackTimeImsak))
+                                //             ],
+                                //           )),
+                                //     ]);
+                                // return wgs;
+                              }
+
+                              callBackBatasWaktu(value) {
+                                if (vExpandableMenu != "waktu") {
+                                  setState(() {
+                                    vExpandableMenu = "waktu";
+                                    isDisplayBatasWaktu = value;
+                                    isDisplaySholat = !value;
+                                    isDisplayRamadhan = !value;
+                                    isDisplayHarian = !value;
+                                    isDisplayTanggal = !value;
+                                  });
+                                }
+                              }
+
+                              isiWidgetBatasWaktu() {
+                                Widget wgs = Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Padding(
+                                          padding: EdgeInsets.only(top: 15),
+                                          child: Row(
+                                            children: [
+                                              CheckBox().checkBox(
+                                                  lebars: 100,
+                                                  checkBoxLabel: "Pagi",
+                                                  boolValue: cboPagi,
+                                                  cbOnChage: cbOnChangePagi,
+                                                  isUpDown: true),
+                                              Expanded(
+                                                  child: TimePicker().datePickerBorder(
+                                                      context,
+                                                      label: "Waktu",
+                                                      textController:
+                                                          txtWaktuPagiController,
+                                                      fungsiCallback:
+                                                          callBackTimeWaktuPagi))
+                                            ],
+                                          )),
+                                      Row(
+                                        children: [
+                                          CheckBox().checkBox(
+                                              lebars: 100,
+                                              checkBoxLabel: "Siang",
+                                              boolValue: cboSiang,
+                                              cbOnChage: cbOnChangeSiang,
+                                              isUpDown: true),
+                                          Expanded(
+                                              child: TimePicker().datePickerBorder(
+                                                  context,
+                                                  label: "Waktu",
+                                                  textController:
+                                                      txtWaktuSiangController,
+                                                  fungsiCallback:
+                                                      callBackTimeWaktuSiang))
+                                        ],
                                       ),
-TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuTanggalController,
-                                              fungsiCallback:
-                                                  callBackTimeTanggal)
-                                          ],)
-                                          
-                                         ),
-                                      
-                                    ],
-                                  ))
+                                      Row(
+                                        children: [
+                                          CheckBox().checkBox(
+                                              lebars: 100,
+                                              checkBoxLabel: "Malam",
+                                              boolValue: cboMalam,
+                                              cbOnChage: cbOnChangeMalam,
+                                              isUpDown: true),
+                                          Expanded(
+                                              child: TimePicker().datePickerBorder(
+                                                  context,
+                                                  label: "Waktu",
+                                                  textController:
+                                                      txtWaktuMalamController,
+                                                  fungsiCallback:
+                                                      callBackTimeWaktuMalam))
+                                        ],
+                                      ),
+                                    ]);
+                                return wgs;
+                              }
 
-                                ]);
-                            return wgs;
-                          }
+                              callBackHarian(value) {
+                                if (vExpandableMenu != "harian") {
+                                  setState(() {
+                                    vExpandableMenu = "harian";
+                                    isDisplayHarian = value;
+                                    isDisplaySholat = !value;
+                                    isDisplayRamadhan = !value;
+                                    isDisplayBatasWaktu = !value;
+                                    isDisplayTanggal = !value;
+                                  });
+                                }
+                              }
 
-                          callBackRamadhan(value) {
-                            if (vExpandableMenu != "ramadhan") {
-                              setState(() {
-                                vExpandableMenu = "ramadhan";
-                                isDisplayRamadhan = value;
-                                isDisplaySholat = !value;
-                                isDisplayBatasWaktu = !value;
-                                isDisplayHarian = !value;
-                                isDisplayTanggal = !value;
-                              });
+                              isiWidgetHarian() {
+                                Widget wgs = Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Padding(
+                                          padding: EdgeInsets.only(top: 15),
+                                          child: Row(
+                                            children: [
+                                              CheckBox().checkBox(
+                                                  lebars: 100,
+                                                  checkBoxLabel: "Senin",
+                                                  boolValue: cboSenin,
+                                                  cbOnChage: cbOnChangeSenin,
+                                                  isUpDown: true),
+                                              Expanded(
+                                                  child: TimePicker().datePickerBorder(
+                                                      context,
+                                                      label: "Waktu",
+                                                      textController:
+                                                          txtWaktuSeninController,
+                                                      fungsiCallback:
+                                                          callBackTimeHarianSenin))
+                                            ],
+                                          )),
+                                      Row(
+                                        children: [
+                                          CheckBox().checkBox(
+                                              lebars: 100,
+                                              checkBoxLabel: "Selasa",
+                                              boolValue: cboSelasa,
+                                              cbOnChage: cbOnChangeSelasa,
+                                              isUpDown: true),
+                                          Expanded(
+                                              child: TimePicker().datePickerBorder(
+                                                  context,
+                                                  label: "Waktu",
+                                                  textController:
+                                                      txtWaktuSelasaController,
+                                                  fungsiCallback:
+                                                      callBackTimeHarianSelasa))
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          CheckBox().checkBox(
+                                              lebars: 100,
+                                              checkBoxLabel: "Rabu",
+                                              boolValue: cboRabu,
+                                              cbOnChage: cbOnChangeRabu,
+                                              isUpDown: true),
+                                          Expanded(
+                                              child: TimePicker().datePickerBorder(
+                                                  context,
+                                                  label: "Waktu",
+                                                  textController:
+                                                      txtWaktuRabuController,
+                                                  fungsiCallback:
+                                                      callBackTimeHarianRabu))
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          CheckBox().checkBox(
+                                              lebars: 100,
+                                              checkBoxLabel: "Kamis",
+                                              boolValue: cboKamis,
+                                              cbOnChage: cbOnChangeKamis,
+                                              isUpDown: true),
+                                          Expanded(
+                                              child: TimePicker().datePickerBorder(
+                                                  context,
+                                                  label: "Waktu",
+                                                  textController:
+                                                      txtWaktuKamisController,
+                                                  fungsiCallback:
+                                                      callBackTimeHarianKamis))
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          CheckBox().checkBox(
+                                              lebars: 100,
+                                              checkBoxLabel: "Jumat",
+                                              boolValue: cboJumat,
+                                              cbOnChage: cbOnChangeJumat,
+                                              isUpDown: true),
+                                          Expanded(
+                                              child: TimePicker().datePickerBorder(
+                                                  context,
+                                                  label: "Waktu",
+                                                  textController:
+                                                      txtWaktuJumatController,
+                                                  fungsiCallback:
+                                                      callBackTimeHarianJumat))
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          CheckBox().checkBox(
+                                              lebars: 100,
+                                              checkBoxLabel: "Sabtu",
+                                              boolValue: cboSabtu,
+                                              cbOnChage: cbOnChangeSabtu,
+                                              isUpDown: true),
+                                          Expanded(
+                                              child: TimePicker().datePickerBorder(
+                                                  context,
+                                                  label: "Waktu",
+                                                  textController:
+                                                      txtWaktuSabtuController,
+                                                  fungsiCallback:
+                                                      callBackTimeHarianSabtu))
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          CheckBox().checkBox(
+                                              lebars: 100,
+                                              checkBoxLabel: "Minggu",
+                                              boolValue: cboMinggu,
+                                              cbOnChage: cbOnChangeMinggu,
+                                              isUpDown: true),
+                                          Expanded(
+                                              child: TimePicker().datePickerBorder(
+                                                  context,
+                                                  label: "Waktu",
+                                                  textController:
+                                                      txtWaktuMingguController,
+                                                  fungsiCallback:
+                                                      callBackTimeHarianMinggu))
+                                        ],
+                                      ),
+                                    ]);
+                                return wgs;
+                              }
+
+                              Widget wg = Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    ExpandableMenu().expandableMenu(
+                                        isDisplay: isDisplaySholat,
+                                        title: "Sholat 5 Waktu",
+                                        isiWidget: isiWidgetSholat,
+                                        callBack: callBackSholat,
+                                        lebar:
+                                            MediaQuery.of(context).size.width),
+                                    SizedBox(
+                                      height: 3,
+                                    ),
+                                    ExpandableMenu().expandableMenu(
+                                        isDisplay: isDisplayBatasWaktu,
+                                        title: "Batas Waktu",
+                                        isiWidget: isiWidgetBatasWaktu,
+                                        callBack: callBackBatasWaktu,
+                                        lebar:
+                                            MediaQuery.of(context).size.width),
+                                    SizedBox(
+                                      height: 3,
+                                    ),
+                                    ExpandableMenu().expandableMenu(
+                                        isDisplay: isDisplayHarian,
+                                        title: "Harian",
+                                        isiWidget: isiWidgetHarian,
+                                        callBack: callBackHarian,
+                                        lebar:
+                                            MediaQuery.of(context).size.width),
+                                    SizedBox(
+                                      height: 3,
+                                    ),
+                                    ExpandableMenu().expandableMenu(
+                                        isDisplay: isDisplayTanggal,
+                                        title: "Tanggal",
+                                        isiWidget: isiWidgetTanggal,
+                                        callBack: callBackTanggal,
+                                        lebar:
+                                            MediaQuery.of(context).size.width),
+                                    SizedBox(
+                                      height: 3,
+                                    ),
+                                    ExpandableMenu().expandableMenu(
+                                        isDisplay: isDisplayRamadhan,
+                                        title: "Bulan Ramadhan",
+                                        isiWidget: isiWidgetRamadhan,
+                                        callBack: callBackRamadhan,
+                                        lebar:
+                                            MediaQuery.of(context).size.width),
+                                  ]);
+                              return wg;
                             }
-                          }
 
-                          isiWidgetRamadhan() {
-                            Widget wgs = Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 15),
-                                    child: 
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Buka",
-                                          boolValue: cboBuka,
-                                          cbOnChage: cbOnChangeBuka,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuBukaController,
-                                              fungsiCallback: callBackTimeBuka))
-                                    ],
-                                  )),
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Sahur",
-                                          boolValue: cboSahur,
-                                          cbOnChage: cbOnChangeSahur,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuSahurController,
-                                              fungsiCallback:
-                                                  callBackTimeSahur))
-                                    ],
-                                  ),
-                                ]);
-                            return wgs;
-                          }
-
-                          callBackBatasWaktu(value) {
-                            if (vExpandableMenu != "waktu") {
-                              setState(() {
-                                vExpandableMenu = "waktu";
-                                isDisplayBatasWaktu = value;
-                                isDisplaySholat = !value;
-                                isDisplayRamadhan = !value;
-                                isDisplayHarian = !value;
-                                isDisplayTanggal = !value;
-                              });
+                            final vData = await ApiUtilities()
+                                .getGlobalParamNoLimit(
+                                    namaApi: "userreminder",
+                                    where: {
+                                  "doa_id": data,
+                                  "user_id": Prefs.getInt("userId")
+                                }); //
+                            if (vData["kode"] == 200) {
+                              if (vData["data"]["data"].length > 0) {
+                                ShowDialog().showDialogs(
+                                    data: {
+                                      "id": data,
+                                      "data": vData["data"]["data"]
+                                    },
+                                    contek: context,
+                                    isiwidget: showDialogWidget,
+                                    judul: "Setting Doa",
+                                    onPressed: onPressedDialog,
+                                    isExpanded: true,
+                                    labelButton: "Submit");
+                              } else {
+                                ShowDialog().showDialogs(
+                                    data: {"id": data, "data": []},
+                                    contek: context,
+                                    isiwidget: showDialogWidget,
+                                    judul: "Setting Doa",
+                                    onPressed: onPressedDialog,
+                                    isExpanded: true,
+                                    labelButton: "Submit");
+                              }
+                            } else {
+                              ShowDialog().showDialogs(
+                                  data: {"id": data, "data": []},
+                                  contek: context,
+                                  isiwidget: showDialogWidget,
+                                  judul: "Setting Doa",
+                                  onPressed: onPressedDialog,
+                                  isExpanded: true,
+                                  labelButton: "Submit");
                             }
-                          }
-
-                          isiWidgetBatasWaktu() {
-                            Widget wgs = Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 15),
-                                    child: 
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Pagi",
-                                          boolValue: cboPagi,
-                                          cbOnChage: cbOnChangePagi,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuPagiController,
-                                              fungsiCallback:
-                                                  callBackTimeWaktuPagi))
-                                    ],
-                                  )),
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Siang",
-                                          boolValue: cboSiang,
-                                          cbOnChage: cbOnChangeSiang,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuSiangController,
-                                              fungsiCallback:
-                                                  callBackTimeWaktuSiang))
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Malam",
-                                          boolValue: cboMalam,
-                                          cbOnChage: cbOnChangeMalam,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuMalamController,
-                                              fungsiCallback:
-                                                  callBackTimeWaktuMalam))
-                                    ],
-                                  ),
-                                ]);
-                            return wgs;
-                          }
-
-                          callBackHarian(value) {
-                            if (vExpandableMenu != "harian") {
-                              setState(() {
-                                vExpandableMenu = "harian";
-                                isDisplayHarian = value;
-                                isDisplaySholat = !value;
-                                isDisplayRamadhan = !value;
-                                isDisplayBatasWaktu = !value;
-                                isDisplayTanggal = !value;
-                              });
-                            }
-                          }
-
-                          isiWidgetHarian() {
-                            Widget wgs = Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 15),
-                                    child: 
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Senin",
-                                          boolValue: cboSenin,
-                                          cbOnChage: cbOnChangeSenin,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuSeninController,
-                                              fungsiCallback:
-                                                  callBackTimeHarianSenin))
-                                    ],
-                                  )),
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Selasa",
-                                          boolValue: cboSelasa,
-                                          cbOnChage: cbOnChangeSelasa,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuSelasaController,
-                                              fungsiCallback:
-                                                  callBackTimeHarianSelasa))
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Rabu",
-                                          boolValue: cboRabu,
-                                          cbOnChage: cbOnChangeRabu,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuRabuController,
-                                              fungsiCallback:
-                                                  callBackTimeHarianRabu))
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Kamis",
-                                          boolValue: cboKamis,
-                                          cbOnChage: cbOnChangeKamis,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuKamisController,
-                                              fungsiCallback:
-                                                  callBackTimeHarianKamis))
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Jumat",
-                                          boolValue: cboJumat,
-                                          cbOnChage: cbOnChangeJumat,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuJumatController,
-                                              fungsiCallback:
-                                                  callBackTimeHarianJumat))
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Sabtu",
-                                          boolValue: cboSabtu,
-                                          cbOnChage: cbOnChangeSabtu,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuSabtuController,
-                                              fungsiCallback:
-                                                  callBackTimeHarianSabtu))
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      CheckBox().checkBox(
-                                          lebars: 100,
-                                          checkBoxLabel: "Minggu",
-                                          boolValue: cboMinggu,
-                                          cbOnChage: cbOnChangeMinggu,
-                                          isUpDown: true),
-                                      Expanded(
-                                          child: TimePicker().datePickerBorder(
-                                              context,
-                                              label: "Waktu",
-                                              textController:
-                                                  txtWaktuMingguController,
-                                              fungsiCallback:
-                                                  callBackTimeHarianMinggu))
-                                    ],
-                                  ),
-                                ]);
-                            return wgs;
-                          }
-
-                          Widget wg = Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                ExpandableMenu().expandableMenu(
-                                    isDisplay: isDisplaySholat,
-                                    title: "Sholat 5 Waktu",
-                                    isiWidget: isiWidgetSholat,
-                                    callBack: callBackSholat,
-                                    lebar: MediaQuery.of(context).size.width),
-                                SizedBox(height: 3,),
-                                ExpandableMenu().expandableMenu(
-                                    isDisplay: isDisplayBatasWaktu,
-                                    title: "Batas Waktu",
-                                    isiWidget: isiWidgetBatasWaktu,
-                                    callBack: callBackBatasWaktu,
-                                    lebar: MediaQuery.of(context).size.width),
-                                    SizedBox(height: 3,),
-                                
-                                ExpandableMenu().expandableMenu(
-                                    isDisplay: isDisplayHarian,
-                                    title: "Harian",
-                                    isiWidget: isiWidgetHarian,
-                                    callBack: callBackHarian,
-                                    lebar: MediaQuery.of(context).size.width),
-                                    SizedBox(height: 3,),
-                                ExpandableMenu().expandableMenu(
-                                    isDisplay: isDisplayTanggal,
-                                    title: "Tanggal",
-                                    isiWidget: isiWidgetTanggal,
-                                    callBack: callBackTanggal,
-                                    lebar: MediaQuery.of(context).size.width),
-                                    SizedBox(height: 3,),
-                                ExpandableMenu().expandableMenu(
-                                    isDisplay: isDisplayRamadhan,
-                                    title: "Bulan Ramadhan",
-                                    isiWidget: isiWidgetRamadhan,
-                                    callBack: callBackRamadhan,
-                                    lebar: MediaQuery.of(context).size.width),
-                                    
-                              ]);
-                          return wg;
-                        }
-
-                        final vData = await ApiUtilities()
-                            .getGlobalParamNoLimit(
-                                namaApi: "userreminder",
-                                where: {
-                              "doa_id": data,
-                              "user_id": Prefs.getInt("userId")
-                            }); //
-                        if (vData["kode"] == 200) {
-                          if (vData["data"]["data"].length > 0) {
-                            ShowDialog().showDialogs(
-                                data: {
-                                  "id": data,
-                                  "data": vData["data"]["data"]
-                                },
-                                contek: context,
-                                isiwidget: showDialogWidget,
-                                judul: "Setting Doa",
-                                onPressed: onPressedDialog,
-                                isExpanded: true,
-                                labelButton: "Submit");
-                          } else {
-                            ShowDialog().showDialogs(
-                                data: {"id": data, "data": []},
-                                contek: context,
-                                isiwidget: showDialogWidget,
-                                judul: "Setting Doa",
-                                onPressed: onPressedDialog,
-                                isExpanded: true,
-                                labelButton: "Submit");
-                          }
-                        } else {
-                          ShowDialog().showDialogs(
-                              data: {"id": data, "data": []},
-                              contek: context,
-                              isiwidget: showDialogWidget,
-                              judul: "Setting Doa",
-                              onPressed: onPressedDialog,
-                              isExpanded: true,
-                              labelButton: "Submit");
-                        }
-                      },
-                    ))
+                          },
+                        ))
                   ],
                   centerTitle: true,
                   bottom: PreferredSize(
@@ -1285,7 +1266,7 @@ TimePicker().datePickerBorder(
                                               label: txtTypeNameController.text,
                                               width: 100.0,
                                               warna: Colors.green,
-                                              warnaBorder: Colors.green[700]),                                          
+                                              warnaBorder: Colors.green[700]),
                                           // Text(txtNameController.text,
                                           //     style: TextStyle(
                                           //         fontSize: 16,
@@ -1293,7 +1274,11 @@ TimePicker().datePickerBorder(
                                           Expanded(
                                             child: Container(),
                                           ),
-                                          Text("Favorit", style: TextStyle(fontWeight: FontWeight.bold),),
+                                          Text(
+                                            "Favorit",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
                                           CheckBox().switchPanel(
                                               activeColor: Colors.green,
                                               activeTrackColor: Colors.green,
@@ -1304,10 +1289,17 @@ TimePicker().datePickerBorder(
                                       ),
                                       SizedBox(
                                         height: 20,
-                                      ),                                      
+                                      ),
                                       Align(
                                           alignment: Alignment.center,
-                                          child: Text(txtNameController.text, textAlign: TextAlign.center, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple),)),
+                                          child: Text(
+                                            txtNameController.text,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.deepPurple),
+                                          )),
                                       SizedBox(
                                         height: 20,
                                       ),

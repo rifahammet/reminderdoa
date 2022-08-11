@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bordered_text/bordered_text.dart';
 import 'package:doa/main.dart';
 import 'package:doa/pages/approval-users/approval-users.dart';
 import 'package:doa/pages/detail-doa/form-doa.dart';
+import 'package:doa/pages/detail-doa/form-multi-doa.dart';
 import 'package:doa/pages/master-doa/master-doa.dart';
 import 'package:doa/pages/type-doa/type-doa.dart';
 import 'package:doa/pages/user/user.dart';
@@ -63,6 +64,7 @@ import 'package:path_provider/path_provider.dart';
 // ignore: import_of_legacy_library_into_null_safe
 //import 'package:sticky_headers/sticky_headers/widget.dart';
 import 'package:sweetalert/sweetalert.dart';
+
 // import 'package:workmanager/workmanager.dart';
 
 String? selectedNotificationPayload;
@@ -284,30 +286,51 @@ class _DashboardPageState extends State<DashboardPage> {
       print(
           "${place.subAdministrativeArea}, ${place.postalCode}, ${place.country}");
       String kota = place.subAdministrativeArea
-          .replaceAll("Kabupaten", "kab.")
+          .replaceAll("Kabupaten ", "")
+          .replaceAll("Kota ", "")
+          .replaceAll(" Regency", "")
           .toUpperCase();
-      if (kota != Prefs.getString("kota_nama")) {
+      String oldTopic = Prefs.getString("kota_kode");
+      print("track : " +
+          kota.toUpperCase() +
+          " | " +
+          Prefs.getString("kota_nama").toUpperCase());
+      if (kota.toUpperCase() != Prefs.getString("kota_nama").toUpperCase()) {
         var data = <dynamic, dynamic>{"kota_nama": kota};
-        ApiUtilities auth = ApiUtilities();
+        // ApiUtilities auth = ApiUtilities();
         final dataDoa =
-            await auth.getGlobalParam(namaApi: "kotas", where: data);
+            await ApiUtilities().getGlobalParam(namaApi: "kotas", where: data);
         bool isSukses = dataDoa["isSuccess"] as bool;
         if (isSukses) {
           var record = dataDoa["data"]["data"][0];
+
+          String newTopic = record['kota_kode'];
           setState(() {
-            Prefs.setString("kota_nama", kota);
-            Prefs.setString("kota_kode", record['api_id']);
-
-            // newDataSholat = snapshot.ge;
-            // print(newDataSholat);
+            Prefs.setString("kota_nama", record['kota_nama']);
+            Prefs.setString("kota_kode", record['kota_kode']);
+            Prefs.setString("api_id", record['api_id']);
           });
+          var dataSave = <dynamic, dynamic>{
+            "kota_kode": record['kota_kode'],
+            "prop_kode": record['prop_kode'],
+            "id": Prefs.getInt("userId")
+          };
+          var where = <dynamic, dynamic>{"id": Prefs.getInt("userId")};
+          ApiUtilities().updateData(dataSave, "signup", where: where);
 
+          if (oldTopic != newTopic) {
+            _messaging.unsubscribeFromTopic("Sholat_" + oldTopic);
+            _messaging.unsubscribeFromTopic("Imsak_" + oldTopic);
+            subscribeTopic(newTopic);
+            print('Topic Updated!');
+          }
+          print('Profile Updated!');
           dynamic newJadwal = await getJadwalSholat();
-
           setState(() {
             newDataSholat = newJadwal['data'];
-            Prefs.setString("kota_nama", kota);
-            Prefs.setString("kota_kode", record['api_id']);            
+            // Prefs.setString("kota_nama", record['kota_nama']);
+            // Prefs.setString("kota_kode", record['kota_kode']);
+            // Prefs.setString("api_id", record['api_id']);
           });
         }
       }
@@ -341,17 +364,55 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
+  void subscribeTopic(String topic) async {
+    print("Subscribe Topic : " + topic);
+    var where = <dynamic, dynamic>{
+      "user_id": Prefs.getInt("userId"),
+      "isjadwal_sholat": 1
+    };
+
+    var data = await ApiUtilities()
+        .getGlobalParam(namaApi: "userreminder", where: where);
+    bool isSukses = data["isSuccess"] as bool;
+    if (isSukses) {
+      _messaging.subscribeToTopic("sholat_" + topic);
+      // print("Sholat : " + topic);
+    }
+
+    where = <dynamic, dynamic>{
+      "user_id": Prefs.getInt("userId"),
+      "isRamadhan": 1
+    };
+
+    data = await ApiUtilities()
+        .getGlobalParam(namaApi: "userreminder", where: where);
+    isSukses = data["isSuccess"] as bool;
+    if (isSukses) {
+      _messaging.subscribeToTopic("imsak_" + topic);
+      // print("Imsak : " + topic);
+    }
+  }
+
   void registerNotification() async {
-    WidgetsFlutterBinding.ensureInitialized();
     // 1. Initialize the Firebase app
     await Firebase.initializeApp();
 
     // 2. Instantiate Firebase Messaging
     _messaging = FirebaseMessaging.instance;
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    _messaging.subscribeToTopic('topic');
+    _messaging.subscribeToTopic('_news');
+    if (Prefs.getBool("isExpired")) {
+      _messaging.unsubscribeFromTopic("sholat_" + Prefs.getString("kota_kode"));
+      _messaging.unsubscribeFromTopic("imsak_" + Prefs.getString("kota_kode"));
+    } else {
+      subscribeTopic(Prefs.getString("kota_kode"));
+    }
+
     _messaging.getToken().then((token) => setState(() {
           debugPrint(token);
+          var dataSave = <dynamic, dynamic>{"firebase_token": token};
+          var where = <dynamic, dynamic>{"id": Prefs.getInt("userId")};
+          ApiUtilities().updateData(dataSave, "signup", where: where);
         }));
 
     // 3. On iOS, this helps to take the user permissions
@@ -377,13 +438,15 @@ class _DashboardPageState extends State<DashboardPage> {
     // if (!isPertamaSholat) {
     //   return newDataSholat;
     // }
-    print(Prefs.getString('kota_nama'));
+    // print(Prefs.getString('kota_nama'));
     var url = Uri.parse("https://api.myquran.com/v1/sholat/jadwal/" +
-        Prefs.getString('kota_kode') +
+        Prefs.getString('api_id') +
         "/" +
         formatDate(DateTime.now(), [yyyy, '/', mm, '/', dd]));
-    //print("https://api.myquran.com/v1/sholat/jadwal/1202/" +
-    //  formatDate(DateTime.now(), [yyyy, '/', mm, '/', dd]));
+    // print("https://api.myquran.com/v1/sholat/jadwal/" +
+    //     Prefs.getString('api_id') +
+    //     "/" +
+    //     formatDate(DateTime.now(), [yyyy, '/', mm, '/', dd]));
     var response = await http.get(url);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -414,12 +477,12 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     isFirst = false;
-    ApiUtilities auth = ApiUtilities();
-    final dataPropinsi = await auth.getGlobalParam(
+    // ApiUtilities auth = ApiUtilities();
+    final dataPropinsi = await ApiUtilities().getGlobalParam(
         namaApi: "masterdoa",
         where: doaKategori.toLowerCase() == "favorit"
             ? {"isfavorit": 1, "user_id": Prefs.getInt("userId")}
-            : {},
+            : {"isfavorit": 0},
         like: txtFilter.text.toString().trim() != ""
             ? {"concat_field": txtFilter.text}
             : {},
@@ -1011,8 +1074,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                         setState(() {
                                           isViewlistPopKategori !=
                                               isViewlistPopKategori;
-                                          print("isViewlistPopKategori=" +
-                                              isViewlistPopKategori.toString());
+                                          // print("isViewlistPopKategori=" +
+                                          //     isViewlistPopKategori.toString());
                                         });
                                       },
                                       child: PopUpMenuButtons().selectPopup(
@@ -1064,13 +1127,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                         onPressed: () {
                                           txtFilter.text = "";
                                           callBackButtonSearch();
-                                          print("test");
+                                          // print("test");
                                         },
                                         icon: Icon(Icons.close_rounded)),
                                     IconButton(
                                         onPressed: () {
                                           callBackButtonSearch();
-                                          print("test");
+                                          // print("test");
                                         },
                                         icon: Icon(Icons.search)),
                                   ],
@@ -1284,19 +1347,30 @@ class _DashboardPageState extends State<DashboardPage> {
 
 class PushNotification {
   PushNotification({
-    this.id,
+    this.payload,
     this.title,
     this.body,
   });
 
-  String? id;
+  String? payload;
   String? title;
   String? body;
+}
+
+bool isNumeric(String s) {
+  if (s == null) {
+    return false;
+  }
+  return double.tryParse(s) != null;
 }
 
 Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Background Notification');
   await Firebase.initializeApp();
+  var dataSave = <dynamic, dynamic>{
+    "json": "Payload : " + message.data['payload'].toString()
+  };
+  ApiUtilities().saveNewData(dataSave, "cancelnotif", '');  
   NotificationService.showNotification(message);
 }
 
@@ -1306,6 +1380,9 @@ class NotificationService {
 
   static Future initialize(context) async {
     print('initialize Notification!');
+    var now = new DateTime.now();
+    var formatter = new DateFormat('yyyy-MM-dd');
+    String formattedDate = formatter.format(now);
     final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
         FlutterLocalNotificationsPlugin();
 
@@ -1318,40 +1395,250 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: (String? payload) async {
       if (payload != null) {
-        debugPrint('payload $payload');
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) => DoaDialog()
-              .buildAddDialog(context, DashboardPage(), payload, true, false),
-        );
+        if (isNumeric(payload)) {
+          // debugPrint('payload $payload');
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) => DoaDialog()
+                .buildAddDialog(context, DashboardPage(), payload, true, false),
+          );
+        } else {
+          String topic = "";
+          if (payload.toString().contains("Sholat") || payload == "Imsak") {
+            if (payload.contains("Sholat")) {
+              topic = "Sholat";
+            } else {
+              topic = payload;
+            }
+
+            String waktu = payload.replaceAll("Sholat ", "");
+            var dataSave = <dynamic, dynamic>{
+              "click": 1,
+              "clicked_date": new DateTime.now().toString().substring(0, 19)
+            };
+            // print("Debug : " + dataSave.toString());
+            var where = <dynamic, dynamic>{
+              "user_id": Prefs.getInt("userId"),
+              "waktu": waktu,
+              "date": formattedDate
+            };
+            ApiUtilities()
+                .updateData(dataSave, "userreminderlog", where: where);
+            await showDialog(
+              context: context,
+              builder: (BuildContext context) => MultiDoaDialog()
+                  .buildAddDialog(context, DashboardPage(), true, false, topic),
+            );
+          } else if (payload.contains("Time")) {
+            String waktu = "Time";
+            String date = payload.substring(5, 15);
+            String time = payload.substring(16);
+
+            var dataSave = <dynamic, dynamic>{
+              "click": 1,
+              "clicked_date": new DateTime.now().toString().substring(0, 19)
+            };
+            // print("Debug : " + dataSave.toString());
+            var where = <dynamic, dynamic>{
+              "user_id": Prefs.getInt("userId"),
+              "waktu": waktu,
+              "date": date,
+              "time": time,
+            };
+            ApiUtilities()
+                .updateData(dataSave, "userreminderlog", where: where);
+            await showDialog(
+              context: context,
+              builder: (BuildContext context) => MultiDoaDialog()
+                  .buildAddDialog(
+                      context, DashboardPage(), true, false, payload),
+            );
+          }
+        }
       }
     });
     final NotificationAppLaunchDetails? notificationAppLaunchDetails =
         await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
 
-    print('payload=');
+    // print('payload=');
     String? payload = notificationAppLaunchDetails!.payload;
     if (payload != null) {
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) => DoaDialog()
-            .buildAddDialog(context, DashboardPage(), payload, true, false),
-      );
+      if (isNumeric(payload)) {
+        // debugPrint('payload $payload');
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) => DoaDialog()
+              .buildAddDialog(context, DashboardPage(), payload, true, false),
+        );
+      } else {
+        String topic = "";
+        if (payload.toString().contains("Sholat") || payload == "Imsak") {
+          if (payload.contains("Sholat")) {
+            topic = "Sholat";
+          } else {
+            topic = payload;
+          }
+
+          String waktu = payload.replaceAll("Sholat ", "");
+          var dataSave = <dynamic, dynamic>{
+            "click": 1,
+            "clicked_date": new DateTime.now().toString().substring(0, 19)
+          };
+          // print("Debug : " + dataSave.toString());
+          var where = <dynamic, dynamic>{
+            "user_id": Prefs.getInt("userId"),
+            "waktu": waktu,
+            "date": formattedDate
+          };
+          ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) => MultiDoaDialog()
+                .buildAddDialog(context, DashboardPage(), true, false, topic),
+          );
+        } else if (payload.contains("Time")) {
+          String waktu = "Time";
+          String date = payload.substring(5, 15);
+          String time = payload.substring(16);
+
+          var dataSave = <dynamic, dynamic>{
+            "click": 1,
+            "clicked_date": new DateTime.now().toString().substring(0, 19)
+          };
+          // print("Debug : " + dataSave.toString());
+          var where = <dynamic, dynamic>{
+            "user_id": Prefs.getInt("userId"),
+            "waktu": waktu,
+            "date": date,
+            "time": time,
+          };
+          ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) => MultiDoaDialog()
+                .buildAddDialog(context, DashboardPage(), true, false, payload),
+          );
+        }
+      }
     }
   }
 
   static Future showNotification(RemoteMessage message) async {
-    var data = <dynamic, dynamic>{"id": message.data['id']};
-    ApiUtilities auth = ApiUtilities();
-    final dataDoa =
-        await auth.getGlobalParam(namaApi: "masterdoa", where: data);
-    bool isSukses = dataDoa["isSuccess"] as bool;
-    if (isSukses) {
-      var record = dataDoa["data"]["data"][0];
+    SharedPreferences? _prefs;
+    _prefs = await SharedPreferences.getInstance();
+    var now = new DateTime.now();
+    var formatter = new DateFormat('yyyy-MM-dd');
+    String formattedDate = formatter.format(now);
+    bool isPush = false;
+    PushNotification notification =
+        PushNotification(payload: "", title: "", body: "");
+    if (isNumeric(message.data['payload'])) {
+      var data = <dynamic, dynamic>{"id": message.data['payload']};
+      //ApiUtilities auth = ApiUtilities();
+      final dataDoa = await ApiUtilities()
+          .getGlobalParam(namaApi: "masterdoa", where: data);
+      bool isSukses = dataDoa["isSuccess"] as bool;
+      if (isSukses) {
+        var record = dataDoa["data"]["data"][0];
+        notification = PushNotification(
+            payload: message.data['payload'],
+            title: record['name'],
+            body: record['arab']);
+      }
+    } else {
+      if (message.data['payload'].toString().contains("Sholat") ||
+          message.data['payload'] == "Imsak") {
+        String waktu =
+            message.data['payload'].toString().replaceAll("Sholat ", "");
+        var where = <dynamic, dynamic>{
+          "user_id": _prefs.getInt("userId"),
+          "waktu": waktu,
+          "date": formattedDate
+        };
 
-      PushNotification notification = PushNotification(
-          id: message.data['id'], title: record['name'], body: record['arab']);
+        final data = await ApiUtilities()
+            .getGlobalParam(namaApi: "userreminderlog", where: where);
+        bool isSukses = data["isSuccess"] as bool;
+        if (isSukses) {
+          isPush = true;
+          var dataSave = <dynamic, dynamic>{
+            "receive": 1,
+            "received_date": new DateTime.now().toString().substring(0, 19)
+          };
+          ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
+          notification = PushNotification(
+              payload: message.data['payload'],
+              title: "Kota/Kab " + _prefs.getString("kota_nama"),
+              body: "Reminder Doa " + message.data['payload']);
+        } else {
+          var dataSave = <dynamic, dynamic>{
+            "json": "user ID :" +
+                _prefs.getInt("userId").toString() +
+                " Waktu :" +
+                waktu.toString() +
+                " Date :" +
+                formattedDate.toString()
+          };
+          ApiUtilities().saveNewData(dataSave, "cancelnotif", '');
+          print("Cancel Notification!");
+        }
+      } else if (message.data['payload'].toString().contains("Time")) {
+        String waktu = "Time";
+        DateTime date = new DateFormat("yyyy-MM-dd")
+            .parse(message.data['payload'].toString().substring(5, 15));
+        DateTime time = new DateFormat("HH:mm:ss")
+            .parse(message.data['payload'].toString().substring(16));
+        // debugPrint("time : " + time.toString());
+        var where = <dynamic, dynamic>{
+          "user_id": _prefs.getInt("userId"),
+          "waktu": waktu,
+          "date": date.toString(),
+          "time": time
+              .toString()
+              .replaceAll("1970-01-01 ", "")
+              .replaceAll(".000", ""),
+        };
+        // print(where);
+        final data = await ApiUtilities()
+            .getGlobalParam(namaApi: "userreminderlog", where: where);
+        bool isSukses = data["isSuccess"] as bool;
+        if (isSukses) {
+          isPush = true;
+          var dataSave = <dynamic, dynamic>{
+            "receive": 1,
+            "received_date": new DateTime.now().toString().substring(0, 19)
+          };
+          var formatter = new DateFormat('dd MMM');
+          var timeformater = new DateFormat('HH:mm');
+          ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
+          notification = PushNotification(
+              payload: message.data['payload'],
+              title: "Reminder Doa",
+              body: "Tanggal : " +
+                  formatter.format(date) +
+                  " Jam : " +
+                  timeformater.format(time));
+        } else {
+          var dataSave = <dynamic, dynamic>{
+            "json": "user ID :" +
+                _prefs.getInt("userId").toString() +
+                " Waktu :" +
+                waktu.toString() +
+                " Date :" +
+                formattedDate.toString() +
+                " Time :" +
+                time
+                    .toString()
+                    .replaceAll("1970-01-01 ", "")
+                    .replaceAll(".000", "")
+          };
+          ApiUtilities().saveNewData(dataSave, "cancelnotif", '');
+          print("Cancel Notification!");
+        }
+      }
+    }
 
+    if (isPush) {
       Future<String> _downloadAndSaveFile(String url, String fileName) async {
         final Directory? directory = await getApplicationDocumentsDirectory();
         final String filePath = '${directory!.path}/$fileName.png';
@@ -1395,7 +1682,7 @@ class NotificationService {
               icon: "@mipmap/launcher_icon",
             ),
           ),
-          payload: notification.id);
+          payload: notification.payload);
     }
   }
 }
