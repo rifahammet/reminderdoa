@@ -74,7 +74,7 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'high_importance_channel', // id
   'High Importance Notifications', // title
   'Notofication Reminder Doa', // Description
-  importance: Importance.high,
+  importance: Importance.max,
 );
 // void callbackDispatcher() {
 //   Workmanager().executeTask((task, inputData) async {
@@ -207,6 +207,7 @@ class _DashboardPageState extends State<DashboardPage> {
   List<PopupMenuItem<int>> listPopKategori = [];
   bool isViewlistPopKategori = false;
 
+  
   @override
   void initState() {
     _initLocationService();
@@ -1367,10 +1368,12 @@ bool isNumeric(String s) {
 Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Background Notification');
   await Firebase.initializeApp();
+  SharedPreferences? _prefs;
+  _prefs = await SharedPreferences.getInstance();  
   var dataSave = <dynamic, dynamic>{
-    "json": "Payload : " + message.data['payload'].toString()
+    "json": "FCM user ID : "+ _prefs.getInt("userId").toString()+" Payload : " + message.data['payload'].toString()
   };
-  ApiUtilities().saveNewData(dataSave, "cancelnotif", '');  
+  ApiUtilities().saveNewData(dataSave, "fcmlog", '');  
   NotificationService.showNotification(message);
 }
 
@@ -1572,14 +1575,14 @@ class NotificationService {
               body: "Reminder Doa " + message.data['payload']);
         } else {
           var dataSave = <dynamic, dynamic>{
-            "json": "user ID :" +
+            "json": "Cancel Notif user ID :" +
                 _prefs.getInt("userId").toString() +
                 " Waktu :" +
                 waktu.toString() +
                 " Date :" +
                 formattedDate.toString()
           };
-          ApiUtilities().saveNewData(dataSave, "cancelnotif", '');
+          ApiUtilities().saveNewData(dataSave, "fcmlog", '');
           print("Cancel Notification!");
         }
       } else if (message.data['payload'].toString().contains("Time")) {
@@ -1620,7 +1623,7 @@ class NotificationService {
                   timeformater.format(time));
         } else {
           var dataSave = <dynamic, dynamic>{
-            "json": "user ID :" +
+            "json": "Cancel Notif user ID :" +
                 _prefs.getInt("userId").toString() +
                 " Waktu :" +
                 waktu.toString() +
@@ -1632,7 +1635,7 @@ class NotificationService {
                     .replaceAll("1970-01-01 ", "")
                     .replaceAll(".000", "")
           };
-          ApiUtilities().saveNewData(dataSave, "cancelnotif", '');
+          ApiUtilities().saveNewData(dataSave, "fcmlog", '');
           print("Cancel Notification!");
         }
       }
@@ -1669,7 +1672,7 @@ class NotificationService {
               playSound: true,
               sound: const RawResourceAndroidNotificationSound('auzubillah'),
               importance: Importance.max,
-              priority: Priority.high,
+              priority: Priority.max,
               enableLights: true,
               color: Colors.blue,
               largeIcon: FilePathAndroidBitmap(largeIconPath),
