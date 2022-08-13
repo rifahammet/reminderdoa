@@ -112,7 +112,8 @@ class _LoginPagePageState extends State<LoginPage>
           Prefs.setString("kota_kode", dataUserLogged["kota_kode"]);
           Prefs.setString("api_id", dataUserLogged["api_id"]);
           Prefs.setString("kota_nama", dataUserLogged["kota_nama"]);
-          Prefs.setString("user_pass", txtPassword.text);
+          Prefs.setString('curdate', '');
+          // Prefs.setString("user_pass", txtPassword.text);
           // Prefs.setInt(
           //     "bank_id", int.parse(dataUserLogged["bank_id"].toString()));
           // print("isFirstLogged=" + isFirstLogged.toString());
@@ -157,7 +158,8 @@ class _LoginPagePageState extends State<LoginPage>
           Prefs.setString("kota_kode", dataUserLogged["kota_kode"]);
           Prefs.setString("api_id", dataUserLogged["api_id"]);
           Prefs.setString("kota_nama", dataUserLogged["kota_nama"]);
-          Prefs.setString("user_pass", txtPassword.text);
+          // Prefs.setString("user_pass", txtPassword.text);
+          Prefs.setString('curdate', '');
           Prefs.setBool("isRefresh", true);
           //Prefs.setInt("userLoginId", int.parse(dataUserLogged["user_login_id"].toString()));
           if (isFirstLogged) {

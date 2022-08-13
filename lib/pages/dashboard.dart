@@ -61,13 +61,15 @@ import 'package:doa/widgets/textbox.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:date_format/date_format.dart';
 import 'package:path_provider/path_provider.dart';
+// import 'package:android_autostart/android_autostart.dart';
 // ignore: import_of_legacy_library_into_null_safe
 //import 'package:sticky_headers/sticky_headers/widget.dart';
 import 'package:sweetalert/sweetalert.dart';
-
+// import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 // import 'package:workmanager/workmanager.dart';
 
 String? selectedNotificationPayload;
+
 // late Position _currentPosition;
 // late String _currentAddress;
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
@@ -207,9 +209,10 @@ class _DashboardPageState extends State<DashboardPage> {
   List<PopupMenuItem<int>> listPopKategori = [];
   bool isViewlistPopKategori = false;
 
-  
   @override
   void initState() {
+    // _batere();
+    // initAutoStart();
     _initLocationService();
     // Workmanager().initialize(
     //     callbackDispatcher, // The top level function, aka callbackDispatcher
@@ -280,6 +283,12 @@ class _DashboardPageState extends State<DashboardPage> {
 
   _getAddressFromLatLng(_currentPosition) async {
     try {
+      var now = new DateTime.now();
+      var formatter = new DateFormat('yyyy-MM-dd');
+      String curdate = formatter.format(now);
+      if (Prefs.getString('curdate')=='') {
+        Prefs.setString('curdate', curdate);
+      }
       List<geo.Placemark> placemarks = await geo.placemarkFromCoordinates(
           _currentPosition.latitude, _currentPosition.longitude);
 
@@ -296,7 +305,8 @@ class _DashboardPageState extends State<DashboardPage> {
           kota.toUpperCase() +
           " | " +
           Prefs.getString("kota_nama").toUpperCase());
-      if (kota.toUpperCase() != Prefs.getString("kota_nama").toUpperCase()) {
+      if (kota.toUpperCase() != Prefs.getString("kota_nama").toUpperCase() ||
+          Prefs.getString('curdate') != curdate) {
         var data = <dynamic, dynamic>{"kota_nama": kota};
         // ApiUtilities auth = ApiUtilities();
         final dataDoa =
@@ -340,6 +350,32 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  // Future _batere() async{
+  //   bool? isBatteryOptimizationDisabled = await DisableBatteryOptimization.isBatteryOptimizationDisabled;
+  //   if(isBatteryOptimizationDisabled!){
+  //     await DisableBatteryOptimization.showDisableBatteryOptimizationSettings();
+  //   }
+  // }
+
+  // Future<void> initAutoStart() async {
+  //   try {
+  //     //check auto-start availability.
+  //     var test = await isAutoStartAvailable;
+  //     print(test);
+  //     //if available then navigate to auto-start setting page.
+  //     if (test) {
+  //       await getAutoStartPermission();
+  //     } else {
+  //       print("auto : not allowed");
+  //     }
+  //   } on PlatformException catch (e) {
+  //     print(e);
+  //   }
+  //   if (!mounted) return;
+  // }
+  // Future initAutoStart() async{
+  //   await AndroidAutostart.navigateAutoStartSetting;
+  // }
   Future _initLocationService() async {
     var location = Location();
 
@@ -1346,6 +1382,8 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 }
 
+mixin AutoStartFlutter {}
+
 class PushNotification {
   PushNotification({
     this.payload,
@@ -1369,11 +1407,14 @@ Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Background Notification');
   await Firebase.initializeApp();
   SharedPreferences? _prefs;
-  _prefs = await SharedPreferences.getInstance();  
+  _prefs = await SharedPreferences.getInstance();
   var dataSave = <dynamic, dynamic>{
-    "json": "FCM user ID : "+ _prefs.getInt("userId").toString()+" Payload : " + message.data['payload'].toString()
+    "json": "FCM user ID : " +
+        _prefs.getInt("userId").toString() +
+        " Payload : " +
+        message.data['payload'].toString()
   };
-  ApiUtilities().saveNewData(dataSave, "fcmlog", '');  
+  ApiUtilities().saveNewData(dataSave, "fcmlog", '');
   NotificationService.showNotification(message);
 }
 
@@ -1532,7 +1573,7 @@ class NotificationService {
     var now = new DateTime.now();
     var formatter = new DateFormat('yyyy-MM-dd');
     String formattedDate = formatter.format(now);
-    bool isPush = false;
+    bool isPush = true;
     PushNotification notification =
         PushNotification(payload: "", title: "", body: "");
     if (isNumeric(message.data['payload'])) {
@@ -1563,7 +1604,6 @@ class NotificationService {
             .getGlobalParam(namaApi: "userreminderlog", where: where);
         bool isSukses = data["isSuccess"] as bool;
         if (isSukses) {
-          isPush = true;
           var dataSave = <dynamic, dynamic>{
             "receive": 1,
             "received_date": new DateTime.now().toString().substring(0, 19)
@@ -1572,8 +1612,9 @@ class NotificationService {
           notification = PushNotification(
               payload: message.data['payload'],
               title: "Kota/Kab " + _prefs.getString("kota_nama"),
-              body: "Reminder Doa " + message.data['payload']);
+              body: "Notifikasi Doa " + message.data['payload']);
         } else {
+          isPush = false;
           var dataSave = <dynamic, dynamic>{
             "json": "Cancel Notif user ID :" +
                 _prefs.getInt("userId").toString() +
@@ -1606,7 +1647,6 @@ class NotificationService {
             .getGlobalParam(namaApi: "userreminderlog", where: where);
         bool isSukses = data["isSuccess"] as bool;
         if (isSukses) {
-          isPush = true;
           var dataSave = <dynamic, dynamic>{
             "receive": 1,
             "received_date": new DateTime.now().toString().substring(0, 19)
@@ -1616,12 +1656,13 @@ class NotificationService {
           ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
           notification = PushNotification(
               payload: message.data['payload'],
-              title: "Reminder Doa",
+              title: "Moslem's Doa Reminder",
               body: "Tanggal : " +
                   formatter.format(date) +
                   " Jam : " +
                   timeformater.format(time));
         } else {
+          isPush = false;
           var dataSave = <dynamic, dynamic>{
             "json": "Cancel Notif user ID :" +
                 _prefs.getInt("userId").toString() +
@@ -1686,6 +1727,13 @@ class NotificationService {
             ),
           ),
           payload: notification.payload);
+      // var dataSave = <dynamic, dynamic>{
+      //   "json": "FCM Success user ID : " +
+      //       _prefs.getInt("userId").toString() +
+      //       " Payload : " +
+      //       message.data['payload'].toString()
+      // };
+      // ApiUtilities().saveNewData(dataSave, "fcmlog", '');
     }
   }
 }
