@@ -79,10 +79,13 @@ dynamic contek;
 // late Position _currentPosition;
 // late String _currentAddress;
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
-  'high_importance_channel', // id
-  'High Importance Notifications', // title
-  'Notofication Reminder Doa', // Description
+  'moslem_doa_reminder', // id
+  'Moslem Doa Reminder', // title
+  'Reminder Doa Muslim', // Description
   importance: Importance.max,
+  enableLights: true,
+  playSound: true,
+  sound: RawResourceAndroidNotificationSound('auzubillah'),
 );
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();

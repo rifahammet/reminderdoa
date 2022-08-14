@@ -429,7 +429,7 @@ Text(
       
     // };
     var dataSave = <dynamic, dynamic>{
-                "user_password": Fungsi().strToMD5(vPassword).substring(0, 25).toString(),
+                "user_password": Fungsi().strToMD5(vPassword).toString(),
                 "user_fullname" : txtBankNameController.text,
                 "password_default": vPassword,
                 "hp" : txtPhoneController.text,

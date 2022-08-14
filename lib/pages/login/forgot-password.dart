@@ -315,7 +315,7 @@ Text(
       
     // };
     var dataSave = <dynamic, dynamic>{
-                "user_password": Fungsi().strToMD5(vPassword).substring(0, 25).toString(),
+                "user_password": Fungsi().strToMD5(vPassword).toString(),
                 "password_default": vPassword,
                 "email" : txtEmailController.text,
                 "isFirst": 1,

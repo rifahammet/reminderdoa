@@ -127,11 +127,11 @@ class ChangePasswordDialog {
                       _key!.currentState!.save();
                       if (txtNewPassword.text.toString() ==
                           txtConfirmation.text.toString()) {
-                        print(Fungsi()
-                                .strToMD5(txtNewPassword.text)
-                                .substring(0, 25) +
-                            " == " +
-                            txtOldPassword.text);
+                        // print(Fungsi()
+                        //         .strToMD5(txtNewPassword.text)
+                        //         .substring(0, 25) +
+                        //     " == " +
+                        //     txtOldPassword.text);
                         if (txtNewPassword.text == txtOldPassword.text) {
                           txtNewPassword.text = '';
                           txtConfirmation.text = '';
@@ -178,7 +178,7 @@ class ChangePasswordDialog {
     SweetAlert.show(context,
         subtitle: "please_wait", style: SweetAlertStyle.loading);
     var dataSave = <dynamic, dynamic>{
-      "user_password": Fungsi().strToMD5(txtNewPassword.text).substring(0, 25),
+      "user_password": Fungsi().strToMD5(txtNewPassword.text).toString(),
       "isFirst": 0,
       "id": Prefs.getInt("userId")
     };

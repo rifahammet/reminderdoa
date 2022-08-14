@@ -133,7 +133,6 @@ class _ApprovalStoreSampahAdminPageState
   onPressedDialog(data) {
     if (Fungsi()
             .strToMD5(txtPasswordController.text)
-            .substring(0, 25)
             .toString() ==
         data["user_pass"]) {
       SweetAlert.show(context,
