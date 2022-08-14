@@ -118,6 +118,9 @@ dependencies:
   geocoding: any
   geolocator: any
   # android_autostart: any
+  # optimize_battery: ^0.0.2
+  # auto_start_flutter: ^0.1.0
+  # android_autostart: any
   
   # disable_battery_optimization: any
   # workmanager: ^0.4.1

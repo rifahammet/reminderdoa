@@ -1,5 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+// import 'package:optimize_battery/optimize_battery.dart';
+// import 'dart:async';
+// import 'package:flutter/services.dart';
+// import 'package:auto_start_flutter/auto_start_flutter.dart';
+// import 'package:android_autostart/android_autostart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bordered_text/bordered_text.dart';
 import 'package:doa/main.dart';
@@ -69,6 +74,7 @@ import 'package:sweetalert/sweetalert.dart';
 // import 'package:workmanager/workmanager.dart';
 
 String? selectedNotificationPayload;
+dynamic contek;
 
 // late Position _currentPosition;
 // late String _currentAddress;
@@ -78,6 +84,8 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'Notofication Reminder Doa', // Description
   importance: Importance.max,
 );
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 // void callbackDispatcher() {
 //   Workmanager().executeTask((task, inputData) async {
 //     _getCurrentLocation();
@@ -119,7 +127,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   late final FirebaseMessaging _messaging;
 
-  PushNotification? _notificationInfo;
+  // PushNotification? _notificationInfo;
 
   List<String> listHeader = ['Menus'];
 
@@ -160,16 +168,17 @@ class _DashboardPageState extends State<DashboardPage> {
   bool isAdmin = false;
   bool isDisplay = false;
   bool isExpired = false;
-  dynamic contek;
 
   String doaKategori = "All";
-
+  String vDoaKategori = "All";
   String namaBank = 'BCA';
   List<dynamic>? newData;
+  List<dynamic>? dataDoaKategoris;
   dynamic newDataSholat;
   var bottomNavigationBarIndex = 0;
   int iPos = 1;
   int iPosMax = 0;
+  int SelectedDoaKategori = 0;
   bool isKlik = false;
   bool isMatikan = false;
   bool diKlik = false;
@@ -207,12 +216,13 @@ class _DashboardPageState extends State<DashboardPage> {
   bool isPertamaSholat = true;
   List<PopupMenuItem<int>> listPopDashboard = [];
   List<PopupMenuItem<int>> listPopKategori = [];
+  List<PopupMenuItem<int>> listPopDoaKategori = [];
   bool isViewlistPopKategori = false;
 
   @override
   void initState() {
-    // _batere();
     // initAutoStart();
+
     _initLocationService();
     // Workmanager().initialize(
     //     callbackDispatcher, // The top level function, aka callbackDispatcher
@@ -271,6 +281,7 @@ class _DashboardPageState extends State<DashboardPage> {
       PopUpMenuButtons()
           .popupMenuItem(value: 5, label: "Keluar", icon: Icons.close_outlined),
     ];
+    getKategory();
     super.initState();
   }
 
@@ -286,7 +297,7 @@ class _DashboardPageState extends State<DashboardPage> {
       var now = new DateTime.now();
       var formatter = new DateFormat('yyyy-MM-dd');
       String curdate = formatter.format(now);
-      if (Prefs.getString('curdate')=='') {
+      if (Prefs.getString('curdate') == '') {
         Prefs.setString('curdate', curdate);
       }
       List<geo.Placemark> placemarks = await geo.placemarkFromCoordinates(
@@ -373,12 +384,18 @@ class _DashboardPageState extends State<DashboardPage> {
   //   }
   //   if (!mounted) return;
   // }
-  // Future initAutoStart() async{
-  //   await AndroidAutostart.navigateAutoStartSetting;
+  // Future batterySetting() async {
+  //   final isIgnored = await OptimizeBattery.isIgnoringBatteryOptimizations();
+  //   if (!isIgnored) {
+  //     OptimizeBattery.stopOptimizingBatteryUsage();
+  //   } else {
+  //     debugPrint("Battery Optimized !");
+  //   }
   // }
+
   Future _initLocationService() async {
     var location = Location();
-
+    // await AndroidAutostart.navigateAutoStartSetting;
     if (!await location.serviceEnabled()) {
       if (!await location.requestService()) {
         return;
@@ -390,8 +407,12 @@ class _DashboardPageState extends State<DashboardPage> {
       permission = await location.requestPermission();
       if (permission != PermissionStatus.GRANTED) {
         return;
-      }
-    }
+      } //else {
+      //   batterySetting();
+      // }
+    } //else {
+    //   batterySetting();
+    // }
 
     var loc = await location.getLocation();
     print("${loc.latitude} ${loc.longitude}");
@@ -436,7 +457,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
     // 2. Instantiate Firebase Messaging
     _messaging = FirebaseMessaging.instance;
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
     _messaging.subscribeToTopic('_news');
     if (Prefs.getBool("isExpired")) {
       _messaging.unsubscribeFromTopic("sholat_" + Prefs.getString("kota_kode"));
@@ -462,12 +483,62 @@ class _DashboardPageState extends State<DashboardPage> {
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       print('User granted permission');
-      // TODO: handle the received notifications
+
+      FirebaseMessaging.instance
+          .getInitialMessage()
+          .then((RemoteMessage message) {
+        if (message != null) {
+          String payload = message.data['payload'];
+          handleClickMessage(payload);
+        }
+      });
+
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint("Message Received From Message Listen!");
+        NotificationForegroundService.showNotification(message);
+      });
+
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
+
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        print("onMessageOpenedApp: $message");
         NotificationService.showNotification(message);
       });
     } else {
       print('User declined or has not accepted permission');
+    }
+  }
+
+  getKategory() async {
+    ApiUtilities auth = ApiUtilities();
+    listPopDoaKategori = [
+      PopUpMenuButtons()
+          .popupMenuItem(value: 0, label: "All", icon: Icons.account_circle),
+    ];
+    final dataDoaKategorisx = await auth
+        .getGlobalParamNoLimit(namaApi: "typesdoa", where: {"is_active": 1});
+    if (dataDoaKategorisx?["isSuccess"]) {
+      var isPertamax = true;
+      dataDoaKategoris = dataDoaKategorisx?["data"]["data"];
+      // print('kategori=' + dataDoaKategoris.toString());
+      //vDoaKategori =dataDoaKategorisx?["data"]["data"][0]["name"];
+      setState(() {
+        for (var DoaKategori in dataDoaKategorisx?["data"]["data"]) {
+          listPopDoaKategori.add(PopUpMenuButtons().popupMenuItem(
+              value: int.parse(DoaKategori["id"].toString()),
+              label: DoaKategori["name"],
+              icon: Icons.admin_panel_settings_rounded,
+              isVisible: true));
+        }
+      });
+
+      //print(dataDoaKategori?["data"]["data"].toString());
     }
   }
 
@@ -515,11 +586,30 @@ class _DashboardPageState extends State<DashboardPage> {
 
     isFirst = false;
     // ApiUtilities auth = ApiUtilities();
+    // final dataPropinsi = await ApiUtilities().getGlobalParam(
+    //     namaApi: "masterdoa",
+    //     where: doaKategori.toLowerCase() == "favorit"
+    //         ? {"isfavorit": 1, "user_id": Prefs.getInt("userId")}
+    //         : {"isfavorit": 0},
+    //     like: txtFilter.text.toString().trim() != ""
+    //         ? {"concat_field": txtFilter.text}
+    //         : {},
+    //     startFrom: (iPos - 1) * int.parse(_selectedType.toString()),
+    //     limit: _selectedType);
+
     final dataPropinsi = await ApiUtilities().getGlobalParam(
         namaApi: "masterdoa",
         where: doaKategori.toLowerCase() == "favorit"
-            ? {"isfavorit": 1, "user_id": Prefs.getInt("userId")}
-            : {"isfavorit": 0},
+            ? SelectedDoaKategori == 0
+                ? {"isfavorit": 1, "user_id": Prefs.getInt("userId")}
+                : {
+                    "isfavorit": 1,
+                    "user_id": Prefs.getInt("userId"),
+                    "type_id": SelectedDoaKategori,
+                  }
+            : SelectedDoaKategori == 0
+                ? {"isfavorit": 0}
+                : {"isfavorit": 0, "type_id": SelectedDoaKategori},
         like: txtFilter.text.toString().trim() != ""
             ? {"concat_field": txtFilter.text}
             : {},
@@ -567,7 +657,7 @@ class _DashboardPageState extends State<DashboardPage> {
   callbackselectedLabelIndex(index) {
     setState(() {
       // ignore: avoid_print
-      print(listLabelToggle[index]);
+      // print(listLabelToggle[index]);
     });
   }
 
@@ -594,7 +684,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     if (isFirst) {
       NotificationService.initialize(context);
-
+      NotificationForegroundService.initialize();
       isFirst = false;
     }
     return WillPopScope(
@@ -616,11 +706,11 @@ class _DashboardPageState extends State<DashboardPage> {
             DoaDialog().buildAddDialog(context, this, data, isEdit, isView),
       );
       if (x != null && x) {
-        print('setstate');
+        // print('setstate');
         Prefs.setBool("isRefresh", true);
-        setState(() {
-          // isFirst= true;
-        });
+        // setState(() {
+        //   // isFirst= true;
+        // });
       }
     }
 
@@ -685,12 +775,31 @@ class _DashboardPageState extends State<DashboardPage> {
 
     callBackSelectedKategori(value) async {
       setState(() {
-        print('value=' + value.toString());
+        // print('value=' + value.toString());
         doaKategori = value == 0
             ? 'All'
             : value == 1
                 ? 'Favorit'
                 : 'Scheduled';
+      });
+      iPos = 1;
+      final x = await getData(isFirst: true);
+      setState(() {
+        newData = x;
+      });
+    }
+
+    callBackSelectedDoaKategori(value) async {
+      setState(() {
+        if (value == 0) {
+          vDoaKategori = "All";
+          SelectedDoaKategori = 0;
+        } else {
+          var data = dataDoaKategoris
+              ?.firstWhere((e) => int.parse(e["id"].toString()) == value);
+          vDoaKategori = data["name"];
+          SelectedDoaKategori = value;
+        }
       });
       iPos = 1;
       final x = await getData(isFirst: true);
@@ -1072,17 +1181,66 @@ class _DashboardPageState extends State<DashboardPage> {
                     padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
                     child: Column(
                       children: [
-                        Row(children: [
-                          Text(
-                            "Daftar Doa",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                              color: Colors.red[900],
-                            ),
+                        Text(
+                          "Daftar Doa",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            color: Colors.red[900],
                           ),
+                        ),
+                        Row(children: [
                           Expanded(
-                            child: SizedBox(),
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Color(0xFFF05A22),
+                                      style: BorderStyle.solid,
+                                      width: 1.0,
+                                    ),
+                                    color: Colors.yellow[50],
+                                    borderRadius: BorderRadius.circular(30.0),
+                                  ),
+                                  height: 40,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                          child: Align(
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                vDoaKategori,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ))),
+                                      GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              // isViewlistPopKategori !=
+                                              //     isViewlistPopKategori;
+                                              // print("isViewlistPopKategori=" +
+                                              //     isViewlistPopKategori.toString());
+                                            });
+                                          },
+                                          child: PopUpMenuButtons().selectPopup(
+                                              listPopupMenuItem:
+                                                  listPopDoaKategori,
+                                              posisi: "kanan",
+                                              x: 0.0,
+                                              y: 95.0,
+                                              callBackSelected:
+                                                  callBackSelectedDoaKategori,
+                                              iconColor: Colors.green[700],
+                                              backgroundColor: Colors.white,
+                                              icon: Icons
+                                                  .arrow_drop_down_circle_sharp)),
+                                    ],
+                                  ))),
+                          // Expanded(
+                          //   child: SizedBox(),
+                          // ),
+                          SizedBox(
+                            width: 10,
                           ),
                           Container(
                               decoration: BoxDecoration(
@@ -1403,33 +1561,178 @@ bool isNumeric(String s) {
   return double.tryParse(s) != null;
 }
 
-Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Background Notification');
-  await Firebase.initializeApp();
+void handleClickMessage(String? payload) async {
+  var now = new DateTime.now();
+  var formatter = new DateFormat('yyyy-MM-dd');
+  String formattedDate = formatter.format(now);
+  if (payload != null) {
+    if (isNumeric(payload)) {
+      // debugPrint('payload $payload');
+      await showDialog(
+        context: contek,
+        builder: (BuildContext context) => DoaDialog()
+            .buildAddDialog(context, DashboardPage(), payload, true, false),
+      );
+    } else {
+      String topic = "";
+      if (payload.toString().contains("Sholat") || payload == "Imsak") {
+        if (payload.contains("Sholat")) {
+          topic = "Sholat";
+        } else {
+          topic = payload;
+        }
+
+        String waktu = payload.replaceAll("Sholat ", "");
+        var dataSave = <dynamic, dynamic>{
+          "click": 1,
+          "clicked_date": new DateTime.now().toString().substring(0, 19)
+        };
+        // print("Debug : " + dataSave.toString());
+        var where = <dynamic, dynamic>{
+          "user_id": Prefs.getInt("userId"),
+          "waktu": waktu,
+          "date": formattedDate
+        };
+        ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
+        await showDialog(
+          context: contek,
+          builder: (BuildContext context) => MultiDoaDialog()
+              .buildAddDialog(context, DashboardPage(), true, false, topic),
+        );
+      } else if (payload.contains("Time")) {
+        String waktu = "Time";
+        String date = payload.substring(5, 15);
+        String time = payload.substring(16);
+
+        var dataSave = <dynamic, dynamic>{
+          "click": 1,
+          "clicked_date": new DateTime.now().toString().substring(0, 19)
+        };
+        // print("Debug : " + dataSave.toString());
+        var where = <dynamic, dynamic>{
+          "user_id": Prefs.getInt("userId"),
+          "waktu": waktu,
+          "date": date,
+          "time": time,
+        };
+        ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
+        await showDialog(
+          context: contek,
+          builder: (BuildContext context) => MultiDoaDialog()
+              .buildAddDialog(context, DashboardPage(), true, false, payload),
+        );
+      }
+    }
+  }
+}
+
+void hanldeReceiveMessage(RemoteMessage message) async {
   SharedPreferences? _prefs;
   _prefs = await SharedPreferences.getInstance();
-  var dataSave = <dynamic, dynamic>{
-    "json": "FCM user ID : " +
-        _prefs.getInt("userId").toString() +
-        " Payload : " +
-        message.data['payload'].toString()
-  };
-  ApiUtilities().saveNewData(dataSave, "fcmlog", '');
-  NotificationService.showNotification(message);
+  var now = new DateTime.now();
+  var formatter = new DateFormat('yyyy-MM-dd');
+  String formattedDate = formatter.format(now);
+
+  if (isNumeric(message.data['payload'])) {
+    var data = <dynamic, dynamic>{"id": message.data['payload']};
+    final dataDoa =
+        await ApiUtilities().getGlobalParam(namaApi: "masterdoa", where: data);
+  } else {
+    if (message.data['payload'].toString().contains("Sholat") ||
+        message.data['payload'] == "Imsak") {
+      String waktu =
+          message.data['payload'].toString().replaceAll("Sholat ", "");
+      var where = <dynamic, dynamic>{
+        "user_id": _prefs.getInt("userId"),
+        "waktu": waktu,
+        "date": formattedDate
+      };
+
+      final data = await ApiUtilities()
+          .getGlobalParam(namaApi: "userreminderlog", where: where);
+      bool isSukses = data["isSuccess"] as bool;
+      if (isSukses) {
+        var dataSave = <dynamic, dynamic>{
+          "receive": 1,
+          "received_date": new DateTime.now().toString().substring(0, 19)
+        };
+        ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
+      } else {
+        var dataSave = <dynamic, dynamic>{
+          "json": "Cancel Notif user ID :" +
+              _prefs.getInt("userId").toString() +
+              " Waktu :" +
+              waktu.toString() +
+              " Date :" +
+              formattedDate.toString()
+        };
+        ApiUtilities().saveNewData(dataSave, "fcmlog", '');
+      }
+    } else if (message.data['payload'].toString().contains("Time")) {
+      String waktu = "Time";
+      DateTime date = new DateFormat("yyyy-MM-dd")
+          .parse(message.data['payload'].toString().substring(5, 15));
+      DateTime time = new DateFormat("HH:mm:ss")
+          .parse(message.data['payload'].toString().substring(16));
+      var where = <dynamic, dynamic>{
+        "user_id": _prefs.getInt("userId"),
+        "waktu": waktu,
+        "date": date.toString(),
+        "time": time
+            .toString()
+            .replaceAll("1970-01-01 ", "")
+            .replaceAll(".000", ""),
+      };
+      final data = await ApiUtilities()
+          .getGlobalParam(namaApi: "userreminderlog", where: where);
+      bool isSukses = data["isSuccess"] as bool;
+      if (isSukses) {
+        var dataSave = <dynamic, dynamic>{
+          "receive": 1,
+          "received_date": new DateTime.now().toString().substring(0, 19)
+        };
+        var formatter = new DateFormat('dd MMM');
+        var timeformater = new DateFormat('HH:mm');
+        ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
+      } else {
+        var dataSave = <dynamic, dynamic>{
+          "json": "Cancel Notif user ID :" +
+              _prefs.getInt("userId").toString() +
+              " Waktu :" +
+              waktu.toString() +
+              " Date :" +
+              formattedDate.toString() +
+              " Time :" +
+              time
+                  .toString()
+                  .replaceAll("1970-01-01 ", "")
+                  .replaceAll(".000", "")
+        };
+        ApiUtilities().saveNewData(dataSave, "fcmlog", '');
+      }
+    }
+  }
+}
+
+Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  hanldeReceiveMessage(message);
+  debugPrint("Message Received From Background!");
 }
 
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin
-      _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
   static Future initialize(context) async {
-    print('initialize Notification!');
-    var now = new DateTime.now();
-    var formatter = new DateFormat('yyyy-MM-dd');
-    String formattedDate = formatter.format(now);
-    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
+    contek = context;
+  }
 
+  static Future showNotification(RemoteMessage message) async {
+    String payload = message.data['payload'];
+    handleClickMessage(payload);
+  }
+}
+
+class NotificationForegroundService {
+  static Future initialize() async {
     AndroidInitializationSettings androidInitializationSettings =
         AndroidInitializationSettings('@mipmap/launcher_icon');
 
@@ -1437,134 +1740,13 @@ class NotificationService {
         InitializationSettings(android: androidInitializationSettings);
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: (String? payload) async {
-      if (payload != null) {
-        if (isNumeric(payload)) {
-          // debugPrint('payload $payload');
-          await showDialog(
-            context: context,
-            builder: (BuildContext context) => DoaDialog()
-                .buildAddDialog(context, DashboardPage(), payload, true, false),
-          );
-        } else {
-          String topic = "";
-          if (payload.toString().contains("Sholat") || payload == "Imsak") {
-            if (payload.contains("Sholat")) {
-              topic = "Sholat";
-            } else {
-              topic = payload;
-            }
-
-            String waktu = payload.replaceAll("Sholat ", "");
-            var dataSave = <dynamic, dynamic>{
-              "click": 1,
-              "clicked_date": new DateTime.now().toString().substring(0, 19)
-            };
-            // print("Debug : " + dataSave.toString());
-            var where = <dynamic, dynamic>{
-              "user_id": Prefs.getInt("userId"),
-              "waktu": waktu,
-              "date": formattedDate
-            };
-            ApiUtilities()
-                .updateData(dataSave, "userreminderlog", where: where);
-            await showDialog(
-              context: context,
-              builder: (BuildContext context) => MultiDoaDialog()
-                  .buildAddDialog(context, DashboardPage(), true, false, topic),
-            );
-          } else if (payload.contains("Time")) {
-            String waktu = "Time";
-            String date = payload.substring(5, 15);
-            String time = payload.substring(16);
-
-            var dataSave = <dynamic, dynamic>{
-              "click": 1,
-              "clicked_date": new DateTime.now().toString().substring(0, 19)
-            };
-            // print("Debug : " + dataSave.toString());
-            var where = <dynamic, dynamic>{
-              "user_id": Prefs.getInt("userId"),
-              "waktu": waktu,
-              "date": date,
-              "time": time,
-            };
-            ApiUtilities()
-                .updateData(dataSave, "userreminderlog", where: where);
-            await showDialog(
-              context: context,
-              builder: (BuildContext context) => MultiDoaDialog()
-                  .buildAddDialog(
-                      context, DashboardPage(), true, false, payload),
-            );
-          }
-        }
-      }
+        onSelectNotification: (String payload) async {
+      handleClickMessage(payload);
     });
     final NotificationAppLaunchDetails? notificationAppLaunchDetails =
         await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
-
-    // print('payload=');
-    String? payload = notificationAppLaunchDetails!.payload;
-    if (payload != null) {
-      if (isNumeric(payload)) {
-        // debugPrint('payload $payload');
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) => DoaDialog()
-              .buildAddDialog(context, DashboardPage(), payload, true, false),
-        );
-      } else {
-        String topic = "";
-        if (payload.toString().contains("Sholat") || payload == "Imsak") {
-          if (payload.contains("Sholat")) {
-            topic = "Sholat";
-          } else {
-            topic = payload;
-          }
-
-          String waktu = payload.replaceAll("Sholat ", "");
-          var dataSave = <dynamic, dynamic>{
-            "click": 1,
-            "clicked_date": new DateTime.now().toString().substring(0, 19)
-          };
-          // print("Debug : " + dataSave.toString());
-          var where = <dynamic, dynamic>{
-            "user_id": Prefs.getInt("userId"),
-            "waktu": waktu,
-            "date": formattedDate
-          };
-          ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
-          await showDialog(
-            context: context,
-            builder: (BuildContext context) => MultiDoaDialog()
-                .buildAddDialog(context, DashboardPage(), true, false, topic),
-          );
-        } else if (payload.contains("Time")) {
-          String waktu = "Time";
-          String date = payload.substring(5, 15);
-          String time = payload.substring(16);
-
-          var dataSave = <dynamic, dynamic>{
-            "click": 1,
-            "clicked_date": new DateTime.now().toString().substring(0, 19)
-          };
-          // print("Debug : " + dataSave.toString());
-          var where = <dynamic, dynamic>{
-            "user_id": Prefs.getInt("userId"),
-            "waktu": waktu,
-            "date": date,
-            "time": time,
-          };
-          ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
-          await showDialog(
-            context: context,
-            builder: (BuildContext context) => MultiDoaDialog()
-                .buildAddDialog(context, DashboardPage(), true, false, payload),
-          );
-        }
-      }
-    }
+    String payload = notificationAppLaunchDetails!.payload;
+    handleClickMessage(payload);
   }
 
   static Future showNotification(RemoteMessage message) async {
@@ -1573,12 +1755,10 @@ class NotificationService {
     var now = new DateTime.now();
     var formatter = new DateFormat('yyyy-MM-dd');
     String formattedDate = formatter.format(now);
-    bool isPush = true;
     PushNotification notification =
         PushNotification(payload: "", title: "", body: "");
     if (isNumeric(message.data['payload'])) {
       var data = <dynamic, dynamic>{"id": message.data['payload']};
-      //ApiUtilities auth = ApiUtilities();
       final dataDoa = await ApiUtilities()
           .getGlobalParam(namaApi: "masterdoa", where: data);
       bool isSukses = dataDoa["isSuccess"] as bool;
@@ -1611,10 +1791,9 @@ class NotificationService {
           ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
           notification = PushNotification(
               payload: message.data['payload'],
-              title: "Kota/Kab " + _prefs.getString("kota_nama"),
-              body: "Notifikasi Doa " + message.data['payload']);
+              title: message.notification.title,
+              body: message.notification.body);
         } else {
-          isPush = false;
           var dataSave = <dynamic, dynamic>{
             "json": "Cancel Notif user ID :" +
                 _prefs.getInt("userId").toString() +
@@ -1624,7 +1803,6 @@ class NotificationService {
                 formattedDate.toString()
           };
           ApiUtilities().saveNewData(dataSave, "fcmlog", '');
-          print("Cancel Notification!");
         }
       } else if (message.data['payload'].toString().contains("Time")) {
         String waktu = "Time";
@@ -1632,7 +1810,6 @@ class NotificationService {
             .parse(message.data['payload'].toString().substring(5, 15));
         DateTime time = new DateFormat("HH:mm:ss")
             .parse(message.data['payload'].toString().substring(16));
-        // debugPrint("time : " + time.toString());
         var where = <dynamic, dynamic>{
           "user_id": _prefs.getInt("userId"),
           "waktu": waktu,
@@ -1642,7 +1819,6 @@ class NotificationService {
               .replaceAll("1970-01-01 ", "")
               .replaceAll(".000", ""),
         };
-        // print(where);
         final data = await ApiUtilities()
             .getGlobalParam(namaApi: "userreminderlog", where: where);
         bool isSukses = data["isSuccess"] as bool;
@@ -1656,13 +1832,9 @@ class NotificationService {
           ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
           notification = PushNotification(
               payload: message.data['payload'],
-              title: "Moslem's Doa Reminder",
-              body: "Tanggal : " +
-                  formatter.format(date) +
-                  " Jam : " +
-                  timeformater.format(time));
+              title: message.notification.title,
+              body: message.notification.body);
         } else {
-          isPush = false;
           var dataSave = <dynamic, dynamic>{
             "json": "Cancel Notif user ID :" +
                 _prefs.getInt("userId").toString() +
@@ -1677,12 +1849,12 @@ class NotificationService {
                     .replaceAll(".000", "")
           };
           ApiUtilities().saveNewData(dataSave, "fcmlog", '');
-          print("Cancel Notification!");
+          print("cancel notif");
         }
       }
     }
 
-    if (isPush) {
+    if (notification.payload != '') {
       Future<String> _downloadAndSaveFile(String url, String fileName) async {
         final Directory? directory = await getApplicationDocumentsDirectory();
         final String filePath = '${directory!.path}/$fileName.png';
@@ -1701,7 +1873,7 @@ class NotificationService {
         'bigPicture',
       );
 
-      _flutterLocalNotificationsPlugin.show(
+      flutterLocalNotificationsPlugin.show(
           notification.hashCode,
           notification.title,
           notification.body,
@@ -1717,23 +1889,16 @@ class NotificationService {
               enableLights: true,
               color: Colors.blue,
               largeIcon: FilePathAndroidBitmap(largeIconPath),
-              styleInformation: BigPictureStyleInformation(
-                FilePathAndroidBitmap(bigPicturePath),
-                hideExpandedLargeIcon: false,
-                htmlFormatContent: true,
-                htmlFormatTitle: true,
-              ),
+              // styleInformation: BigPictureStyleInformation(
+              //   FilePathAndroidBitmap(bigPicturePath),
+              //   hideExpandedLargeIcon: false,
+              //   htmlFormatContent: true,
+              //   htmlFormatTitle: true,
+              // ),
               icon: "@mipmap/launcher_icon",
             ),
           ),
           payload: notification.payload);
-      // var dataSave = <dynamic, dynamic>{
-      //   "json": "FCM Success user ID : " +
-      //       _prefs.getInt("userId").toString() +
-      //       " Payload : " +
-      //       message.data['payload'].toString()
-      // };
-      // ApiUtilities().saveNewData(dataSave, "fcmlog", '');
     }
   }
 }
