@@ -21,16 +21,14 @@ void main() async {
     ScreenBreakpoints(desktop: 800, tablet: 550, watch: 200),
   );
 
-  runApp(
-    EasyLocalization(
-      child: MyApp(),
-      supportedLocales: [
-        Locale('id', 'ID'),
-        Locale('en', 'US'),
-      ],
-      path: 'assets/langs',
-    ),
-  );
+  runApp(EasyLocalization(
+    child: MyApp(),
+    supportedLocales: [
+      Locale('id', 'ID'),
+      Locale('en', 'US'),
+    ],
+    path: 'assets/langs',
+  ));
 }
 
 class MyApp extends StatelessWidget {

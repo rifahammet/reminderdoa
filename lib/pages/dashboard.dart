@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-// import 'package:optimize_battery/optimize_battery.dart';
+import 'package:optimize_battery/optimize_battery.dart';
 // import 'dart:async';
 // import 'package:flutter/services.dart';
 // import 'package:auto_start_flutter/auto_start_flutter.dart';
@@ -303,6 +303,7 @@ class _DashboardPageState extends State<DashboardPage> {
       if (Prefs.getString('curdate') == '') {
         Prefs.setString('curdate', curdate);
       }
+
       List<geo.Placemark> placemarks = await geo.placemarkFromCoordinates(
           _currentPosition.latitude, _currentPosition.longitude);
 
@@ -319,6 +320,7 @@ class _DashboardPageState extends State<DashboardPage> {
           kota.toUpperCase() +
           " | " +
           Prefs.getString("kota_nama").toUpperCase());
+      print("track Date : " + curdate + " | " + Prefs.getString("curdate"));
       if (kota.toUpperCase() != Prefs.getString("kota_nama").toUpperCase() ||
           Prefs.getString('curdate') != curdate) {
         var data = <dynamic, dynamic>{"kota_nama": kota};
@@ -387,14 +389,14 @@ class _DashboardPageState extends State<DashboardPage> {
   //   }
   //   if (!mounted) return;
   // }
-  // Future batterySetting() async {
-  //   final isIgnored = await OptimizeBattery.isIgnoringBatteryOptimizations();
-  //   if (!isIgnored) {
-  //     OptimizeBattery.stopOptimizingBatteryUsage();
-  //   } else {
-  //     debugPrint("Battery Optimized !");
-  //   }
-  // }
+  Future batterySetting() async {
+    final isIgnored = await OptimizeBattery.isIgnoringBatteryOptimizations();
+    if (!isIgnored) {
+      OptimizeBattery.stopOptimizingBatteryUsage();
+    } else {
+      OptimizeBattery.openBatteryOptimizationSettings();
+    }
+  }
 
   Future _initLocationService() async {
     var location = Location();
@@ -410,12 +412,12 @@ class _DashboardPageState extends State<DashboardPage> {
       permission = await location.requestPermission();
       if (permission != PermissionStatus.GRANTED) {
         return;
-      } //else {
-      //   batterySetting();
-      // }
-    } //else {
-    //   batterySetting();
-    // }
+      } else {
+        batterySetting();
+      }
+    } else {
+      batterySetting();
+    }
 
     var loc = await location.getLocation();
     print("${loc.latitude} ${loc.longitude}");
@@ -1585,7 +1587,7 @@ void handleClickMessage(String? payload) async {
           topic = payload;
         }
 
-        String waktu = payload.replaceAll("Sholat ", "");
+        final waktu = payload.toString().split(' ');
         var dataSave = <dynamic, dynamic>{
           "click": 1,
           "clicked_date": new DateTime.now().toString().substring(0, 19)
@@ -1593,7 +1595,8 @@ void handleClickMessage(String? payload) async {
         // print("Debug : " + dataSave.toString());
         var where = <dynamic, dynamic>{
           "user_id": Prefs.getInt("userId"),
-          "waktu": waktu,
+          'kota_kode': waktu[2].toString(),
+          "waktu": waktu[1].toString(),
           "date": formattedDate
         };
         ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
@@ -1643,11 +1646,11 @@ void hanldeReceiveMessage(RemoteMessage message) async {
   } else {
     if (message.data['payload'].toString().contains("Sholat") ||
         message.data['payload'] == "Imsak") {
-      String waktu =
-          message.data['payload'].toString().replaceAll("Sholat ", "");
+      final waktu = message.data['payload'].toString().split(' ');
       var where = <dynamic, dynamic>{
         "user_id": _prefs.getInt("userId"),
-        "waktu": waktu,
+        'kota_kode': waktu[2].toString(),
+        "waktu": waktu[1].toString(),
         "date": formattedDate
       };
 
@@ -1664,8 +1667,10 @@ void hanldeReceiveMessage(RemoteMessage message) async {
         var dataSave = <dynamic, dynamic>{
           "json": "Cancel Notif user ID :" +
               _prefs.getInt("userId").toString() +
+              " Kode Kota :" +
+              waktu[2].toString() +
               " Waktu :" +
-              waktu.toString() +
+              waktu[1].toString() +
               " Date :" +
               formattedDate.toString()
         };
@@ -1775,11 +1780,11 @@ class NotificationForegroundService {
     } else {
       if (message.data['payload'].toString().contains("Sholat") ||
           message.data['payload'] == "Imsak") {
-        String waktu =
-            message.data['payload'].toString().replaceAll("Sholat ", "");
+        final waktu = message.data['payload'].toString().split(' ');
         var where = <dynamic, dynamic>{
           "user_id": _prefs.getInt("userId"),
-          "waktu": waktu,
+          'kota_kode': waktu[2].toString(),
+          "waktu": waktu[1].toString(),
           "date": formattedDate
         };
 
@@ -1800,8 +1805,10 @@ class NotificationForegroundService {
           var dataSave = <dynamic, dynamic>{
             "json": "Cancel Notif user ID :" +
                 _prefs.getInt("userId").toString() +
+                " Kode Kota :" +
+                waktu[2].toString() +
                 " Waktu :" +
-                waktu.toString() +
+                waktu[1].toString() +
                 " Date :" +
                 formattedDate.toString()
           };
@@ -1892,12 +1899,12 @@ class NotificationForegroundService {
               enableLights: true,
               color: Colors.blue,
               largeIcon: FilePathAndroidBitmap(largeIconPath),
-              // styleInformation: BigPictureStyleInformation(
-              //   FilePathAndroidBitmap(bigPicturePath),
-              //   hideExpandedLargeIcon: false,
-              //   htmlFormatContent: true,
-              //   htmlFormatTitle: true,
-              // ),
+              styleInformation: BigPictureStyleInformation(
+                FilePathAndroidBitmap(bigPicturePath),
+                hideExpandedLargeIcon: false,
+                htmlFormatContent: true,
+                htmlFormatTitle: true,
+              ),
               icon: "@mipmap/launcher_icon",
             ),
           ),

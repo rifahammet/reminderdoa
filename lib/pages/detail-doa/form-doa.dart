@@ -109,11 +109,8 @@ class DoaDialog {
           });
       bool isSukses = vData["isSuccess"] as bool;
       if (!isSukses) {
-        vData = await ApiUtilities().getGlobalParamNoLimit(
-          namaApi: "masterdoa",
-          where: {
-            "id": data
-          });        
+        vData = await ApiUtilities()
+            .getGlobalParamNoLimit(namaApi: "masterdoa", where: {"id": data});
       }
       return vData["data"]["data"][0];
     } else {
@@ -1063,7 +1060,7 @@ class DoaDialog {
                                         children: [
                                           CheckBox().checkBox(
                                               lebars: 100,
-                                              checkBoxLabel: "Minggu",
+                                              checkBoxLabel: "Ahad",
                                               boolValue: cboMinggu,
                                               cbOnChage: cbOnChangeMinggu,
                                               isUpDown: true),
