@@ -394,7 +394,7 @@ class _DashboardPageState extends State<DashboardPage> {
     if (!isIgnored) {
       OptimizeBattery.stopOptimizingBatteryUsage();
     } else {
-      OptimizeBattery.openBatteryOptimizationSettings();
+      debugPrint("Battery Already Optimized :)");
     }
   }
 
