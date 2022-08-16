@@ -1,7 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doa/utils/function.dart';
+import 'package:intl/intl.dart';
 
 
 
@@ -292,10 +293,10 @@ class ListUp {
 
     String format(double n, {bool isInteger = true}) {
     if (isInteger) {
-      final formatter = new NumberFormat("#,###", "en_US");
+      final formatter = NumberFormat("#,###", "en_US");
       return formatter.format(n);
     } else {
-      final formatter = new NumberFormat("#,###.00", "en_US");
+      final formatter = NumberFormat("#,###.00", "en_US");
       return formatter.format(n);
     }
   }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:intl/intl.dart';
 import 'package:optimize_battery/optimize_battery.dart';
 // import 'dart:async';
 // import 'package:flutter/services.dart';
@@ -63,7 +64,7 @@ import 'package:doa/widgets/label.dart';
 import 'package:doa/widgets/pdf_viewer.dart';
 import 'package:doa/widgets/popupmenubutton.dart';
 import 'package:doa/widgets/textbox.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart';
 import 'package:date_format/date_format.dart';
 import 'package:path_provider/path_provider.dart';
 // import 'package:android_autostart/android_autostart.dart';
@@ -316,11 +317,11 @@ class _DashboardPageState extends State<DashboardPage> {
           .replaceAll(" Regency", "")
           .toUpperCase();
       String oldTopic = Prefs.getString("kota_kode");
-      print("track : " +
+      print("Track Location : " +
           kota.toUpperCase() +
           " | " +
           Prefs.getString("kota_nama").toUpperCase());
-      print("track Date : " + curdate + " | " + Prefs.getString("curdate"));
+      print("Track Date : " + curdate + " | " + Prefs.getString("curdate"));
       if (kota.toUpperCase() != Prefs.getString("kota_nama").toUpperCase() ||
           Prefs.getString('curdate') != curdate) {
         var data = <dynamic, dynamic>{"kota_nama": kota};

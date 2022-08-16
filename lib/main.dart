@@ -2,7 +2,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:doa/pages/onboarding.dart';
@@ -21,14 +21,15 @@ void main() async {
     ScreenBreakpoints(desktop: 800, tablet: 550, watch: 200),
   );
 
-  runApp(EasyLocalization(
-    child: MyApp(),
-    supportedLocales: [
-      Locale('id', 'ID'),
-      Locale('en', 'US'),
-    ],
-    path: 'assets/langs',
-  ));
+  runApp(MyApp());
+  // runApp(EasyLocalization(
+  //   child: MyApp(),
+  //   supportedLocales: [
+  //     Locale('id', 'ID'),
+  //     Locale('en', 'US'),
+  //   ],
+  //   path: 'assets/langs',
+  // ));
 }
 
 class MyApp extends StatelessWidget {
@@ -39,19 +40,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "app_title".tr(),
+      title: "Moslem's Doa Reminder",
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        DefaultCupertinoLocalizations.delegate,
-        EasyLocalization.of(context).delegate,
-      ],
-      supportedLocales: EasyLocalization.of(context).supportedLocales,
-      locale: EasyLocalization.of(context).locale,
+      // localizationsDelegates: [
+      //   GlobalMaterialLocalizations.delegate,
+      //   GlobalWidgetsLocalizations.delegate,
+      //   GlobalCupertinoLocalizations.delegate,
+      //   DefaultCupertinoLocalizations.delegate,
+      //   EasyLocalization.of(context).delegate,
+      // ],
+      // supportedLocales: EasyLocalization.of(context).supportedLocales,
+      // locale: EasyLocalization.of(context).locale,
       home: Onboarding(),
     );
   }

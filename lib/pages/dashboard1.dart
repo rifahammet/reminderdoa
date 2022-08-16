@@ -8,7 +8,7 @@ import 'package:doa/widgets/blury-container.dart';
 import 'package:doa/widgets/datepicker.dart';
 import 'package:doa/widgets/fl-chart.dart';
 import 'package:doa/widgets/textbox.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart';
 // ignore: import_of_legacy_library_into_null_safe
 // import 'package:sticky_headers/sticky_headers/widget.dart';
 

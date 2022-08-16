@@ -8,7 +8,7 @@ import 'package:doa/utils/pref_manager.dart';
 import 'package:doa/widgets/bottomDbNavigation.dart';
 import 'package:doa/widgets/datatable.dart';
 import 'package:sweetalert/sweetalert.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart';
 
 class TypeDoaPage extends StatefulWidget {
   const TypeDoaPage({Key? key}) : super(key: key);
@@ -289,7 +289,7 @@ class _TypeDoaPageState extends State<TypeDoaPage> {
         appBar: AppBar(
           backgroundColor: Colors.green[700],
           title:  Text(
-            "tipe".tr(),
+            "Kategori",
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 18),
           ),

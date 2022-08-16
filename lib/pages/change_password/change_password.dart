@@ -7,7 +7,7 @@ import 'package:doa/utils/api-utility.dart';
 import 'package:doa/utils/function.dart';
 import 'package:doa/utils/pref_manager.dart';
 import 'package:doa/widgets/textbox.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweetalert/sweetalert.dart';
 
 class ChangePasswordDialog {

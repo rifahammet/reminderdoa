@@ -9,7 +9,7 @@ import 'package:doa/utils/pref_manager.dart';
 import 'package:doa/widgets/bottomDbNavigation.dart';
 import 'package:doa/widgets/datatable.dart';
 import 'package:sweetalert/sweetalert.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart';
 
 class MasterDoaPage extends StatefulWidget {
   const MasterDoaPage({Key? key}) : super(key: key);
@@ -44,13 +44,12 @@ class _MasterDoaPageState extends State<MasterDoaPage> {
     FocusScope.of(context).requestFocus(FocusNode());
     final x = await showDialog(
       context: context,
-      builder: (BuildContext context) =>  MasterDoaDialog()
-          .buildAddDialog(context, this, data, isEdit, isView),
+      builder: (BuildContext context) =>
+          MasterDoaDialog().buildAddDialog(context, this, data, isEdit, isView),
     );
-    if(x!= null && x){
+    if (x != null && x) {
       print('setstate');
-    setState(() {
-    });
+      setState(() {});
     }
   }
 
@@ -64,9 +63,14 @@ class _MasterDoaPageState extends State<MasterDoaPage> {
     if (!isFirst) {
       return newData;
     }
-    ApiUtilities auth =  ApiUtilities();
+    ApiUtilities auth = ApiUtilities();
     final dataPropinsi = auth.getGlobalParam(
-        namaApi: "masterdoa",  like: txtFilter.text.toString().trim()!=""? { "concat_field": txtFilter.text}:{}, startFrom: (iPos-1) * int.parse(_selectedType.toString()) , limit: _selectedType);
+        namaApi: "masterdoa",
+        like: txtFilter.text.toString().trim() != ""
+            ? {"concat_field": txtFilter.text}
+            : {},
+        startFrom: (iPos - 1) * int.parse(_selectedType.toString()),
+        limit: _selectedType);
     return dataPropinsi;
   }
 
@@ -95,9 +99,7 @@ class _MasterDoaPageState extends State<MasterDoaPage> {
     editData(context, int.parse(newData?[index]["id"]), true, true);
   }
 
-  callBackEdit(index) async {
-    
-  }
+  callBackEdit(index) async {}
 
   callBackDelete(index) async {
 //     SweetAlert.show(context,
@@ -127,9 +129,7 @@ class _MasterDoaPageState extends State<MasterDoaPage> {
 //           isEdit: true,
 //           isCustom: true,
 //           callBack: callBack);
-    
 
-      
 //     } else {
 // print("hapus disana");
 //       var where = <dynamic, dynamic>{"barang_kode": int.parse(newData?[index]["barang_kode"])};
@@ -147,12 +147,20 @@ class _MasterDoaPageState extends State<MasterDoaPage> {
       children: <Widget>[
         Text(
           newData?[index]['name'],
-          style: TextStyle(color: Colors.grey[700], fontSize: 12,fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 12,
+              fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 5,),
+        SizedBox(
+          height: 5,
+        ),
         Text(
           newData?[index]['type_name'],
-          style: TextStyle(color: Colors.grey[700], fontSize: 12,fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 12,
+              fontWeight: FontWeight.bold),
         ),
         // SizedBox(height: 10,),
         // Text(
@@ -183,10 +191,13 @@ class _MasterDoaPageState extends State<MasterDoaPage> {
     setState(() {
       diKlik = true;
       this.bottomNavigationBarIndex = index;
-      
+
       Fungsi formating = new Fungsi();
       iPos = formating.getPos(index, iPos, iPosMax);
-      print("current page="+iPos.toString()+ " page maximum="+iPosMax.toString());
+      print("current page=" +
+          iPos.toString() +
+          " page maximum=" +
+          iPosMax.toString());
     });
     final tList = await getData(isCount: false, ket: 'callBack');
     setState(() {
@@ -206,81 +217,89 @@ class _MasterDoaPageState extends State<MasterDoaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      //drawer: AppDrawer(),
-      appBar: AppBar(
-        backgroundColor: Colors.green[700],
-        title:  Text(
-          "master_doa".tr(),
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18),
+        resizeToAvoidBottomInset: false,
+        //drawer: AppDrawer(),
+        appBar: AppBar(
+          backgroundColor: Colors.green[700],
+          title: Text(
+            "Doa",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18),
+          ),
+          centerTitle: true,
+          bottom: PreferredSize(
+              child: Column(children: [
+                Container(
+                  color: Colors.orange[700],
+                  height: 4.0,
+                )
+              ]),
+              preferredSize: Size.fromHeight(4.0)),
         ),
-        centerTitle: true,
-        bottom: PreferredSize(
-            child: Column(children: [
-              Container(
-                color: Colors.orange[700],
-                height: 4.0,
-              )
-            ]),
-            preferredSize: Size.fromHeight(4.0)),
-      ),
-
-      body: Container(
-          color: Colors.grey[100],
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                  child: FutureBuilder(
-                      future: getData(isCount: true, isFirst: true),
-                      builder: (context, AsyncSnapshot snapshot) {
-                        if (snapshot.hasError) print(snapshot.error);
-                        if(snapshot.hasData){
-                        var jmlData = snapshot.data==null ? 0 : snapshot.data?["isSuccess"]==false? 0: snapshot.data?["data"]["total_data"]==null ? 0 :snapshot.data?["data"]["total_data"];
-                        Fungsi fungsi = new Fungsi();
-                        iPosMax = fungsi.getIposMax(_selectedType, jmlData);
-                        List<dynamic>? list = snapshot.data?["isSuccess"]==false? [] : snapshot.data?["data"]["data"];
-                          newData = list;
-                          return Column(
-                            children: <Widget>[
-                              DataTablet().getSearchForm(context,
-                                  txtFilter: txtFilter,
-                                  returnComboBox: callBackComboBox,
-                                  // dropDownData: _dropDownType,
-                                  comboSelected: _selectedType,
-                                  returnButtonSearch: callBackButtonSearch),
-                              DataTablet().getListData(
-                                  context: context,
-                                  newData: newData,
-                                  callBackDelete: callBackDelete,
-                                  callBackEdit: callBackEdit,
-                                  callBackView: callBackView,
-                                  isiWidget: callBackIsiWidget,
-                                  isDeleteOnly: true,
-                                  isKlik: isKlik,
-                                  warna: Colors.green,
-                                  isAktifGantiWarna: true,
-                                  fieldGantiWarna: "is_active",
-                                  isAPI: true),
-                            ],
-                          );
-                        }
-                        return Center(
+        body: Container(
+            color: Colors.grey[100],
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                    child: FutureBuilder(
+                        future: getData(isCount: true, isFirst: true),
+                        builder: (context, AsyncSnapshot snapshot) {
+                          if (snapshot.hasError) print(snapshot.error);
+                          if (snapshot.hasData) {
+                            var jmlData = snapshot.data == null
+                                ? 0
+                                : snapshot.data?["isSuccess"] == false
+                                    ? 0
+                                    : snapshot.data?["data"]["total_data"] ==
+                                            null
+                                        ? 0
+                                        : snapshot.data?["data"]["total_data"];
+                            Fungsi fungsi = new Fungsi();
+                            iPosMax = fungsi.getIposMax(_selectedType, jmlData);
+                            List<dynamic>? list =
+                                snapshot.data?["isSuccess"] == false
+                                    ? []
+                                    : snapshot.data?["data"]["data"];
+                            newData = list;
+                            return Column(
+                              children: <Widget>[
+                                DataTablet().getSearchForm(context,
+                                    txtFilter: txtFilter,
+                                    returnComboBox: callBackComboBox,
+                                    // dropDownData: _dropDownType,
+                                    comboSelected: _selectedType,
+                                    returnButtonSearch: callBackButtonSearch),
+                                DataTablet().getListData(
+                                    context: context,
+                                    newData: newData,
+                                    callBackDelete: callBackDelete,
+                                    callBackEdit: callBackEdit,
+                                    callBackView: callBackView,
+                                    isiWidget: callBackIsiWidget,
+                                    isDeleteOnly: true,
+                                    isKlik: isKlik,
+                                    warna: Colors.green,
+                                    isAktifGantiWarna: true,
+                                    fieldGantiWarna: "is_active",
+                                    isAPI: true),
+                              ],
+                            );
+                          }
+                          return Center(
                             child: CircularProgressIndicator(),
                           );
-                      }))
-            ],
-          )),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          editData(context, null, false, true);
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.green,
-      ),
-      bottomNavigationBar: BottomDbNavigationBarApp(
-          context, bottomNavigationBarIndex, callBack)
-    );
+                        }))
+              ],
+            )),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            editData(context, null, false, true);
+          },
+          child: Icon(Icons.add),
+          backgroundColor: Colors.green,
+        ),
+        bottomNavigationBar: BottomDbNavigationBarApp(
+            context, bottomNavigationBarIndex, callBack));
   }
 }

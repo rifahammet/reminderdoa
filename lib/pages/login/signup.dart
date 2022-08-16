@@ -18,7 +18,7 @@ import 'package:doa/widgets/textbox.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweetalert/sweetalert.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart';
 
 class RegisterDialog {
   GlobalKey<FormState>? _key;
@@ -56,7 +56,7 @@ class RegisterDialog {
   dynamic listSeafood;
   bool isFirst = true;
 
-  Future<int> getUserId() async {
+  Future<int?> getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getInt('userId');
   }

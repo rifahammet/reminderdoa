@@ -9,7 +9,7 @@ class XML {
     print("dijalanin");
     Directory appDocDir = Platform.isIOS
         ? await path.getApplicationDocumentsDirectory()
-        : (await path.getExternalStorageDirectories(type: path.StorageDirectory.downloads)).first!;
+        : (await path.getExternalStorageDirectories(type: path.StorageDirectory.downloads))!.first;
     
       var targetPath = appDocDir.path;
       final bookshelfXml = '''<?xml version="1.0"?>
@@ -27,7 +27,7 @@ class XML {
   void readAuthXml() async {
      Directory appDocDir = Platform.isIOS
         ? await path.getApplicationDocumentsDirectory()
-        : (await path.getExternalStorageDirectories(type: path.StorageDirectory.downloads)).first!;
+        : (await path.getExternalStorageDirectories(type: path.StorageDirectory.downloads))!.first;
     var targetPath = appDocDir.path;
       final files =  File(targetPath+'/auth.xml');
       if(files.existsSync()){
@@ -44,7 +44,7 @@ class XML {
   void generateXML({namaFile}) async {
     Directory appDocDir = Platform.isIOS
         ? await path.getApplicationDocumentsDirectory()
-        : (await path.getExternalStorageDirectories(type: path.StorageDirectory.documents)).first!;
+        : (await path.getExternalStorageDirectories(type: path.StorageDirectory.documents))!.first;
     var targetPath = appDocDir.path;
         final file =  File(targetPath+namaFile);
     final document = XmlDocument.parse(file.readAsStringSync());
@@ -68,7 +68,7 @@ class XML {
 void fileEdit({baseUrl,batchUrl} )async {
   Directory appDocDir = Platform.isIOS
         ? await path.getApplicationDocumentsDirectory()
-        : (await path.getExternalStorageDirectories(type: path.StorageDirectory.downloads)).first!;
+        : (await path.getExternalStorageDirectories(type: path.StorageDirectory.downloads))!.first;
     
     var targetPath = appDocDir.path;
       final bookshelfXml = '''<?xml version="1.0"?>

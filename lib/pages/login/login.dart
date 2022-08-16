@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:doa/pages/login/forgot-password.dart';
 import 'package:doa/widgets/label.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:doa/pages/change_password/change_password.dart';
 import 'package:doa/pages/dashboard.dart';
@@ -283,14 +283,14 @@ class _LoginPagePageState extends State<LoginPage>
                               TextBox().textBoxBorderedIconValidate(
                                 context,
                                 textName: "Nama User",
-                                hint: "username_login".tr(),
+                                hint: "Username",
                                 textController: txtEmail,
                                 textChange: changeTextField,
                                 icon: Icons.person,
                               ),
                               TextBox().textBoxBorderedIconValidate(context,
                                   textName: "Password",
-                                  hint: "password_login".tr(),
+                                  hint: "Password",
                                   obscureText: obscureText,
                                   icon: Icons.vpn_key,
                                   suffixIcon: icon,

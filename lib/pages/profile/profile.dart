@@ -14,7 +14,7 @@ import 'package:doa/widgets/dropdown.dart';
 import 'package:doa/widgets/listup.dart';
 import 'package:doa/widgets/textbox.dart';
 import 'package:sweetalert/sweetalert.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart';
 
 class ProfileDialog {
   GlobalKey<FormState>? _key;
@@ -207,13 +207,13 @@ class ProfileDialog {
                                       textFocusNote: txtNamaLengkapFocusNode,
                                     ),
                                     ListUp().listUpWithBorderValidate(context,
-                                        label: "province".tr(),
+                                        label: "Propinsi",
                                         textController:
                                             txtPropinsiNamaController,
                                         textFocusNote: txtPropinsiNamaFocusNode,
                                         suffixIconOnPressed: listUPPropinsi),
                                     ListUp().listUpWithBorderValidate(context,
-                                        label: "city".tr(),
+                                        label: "Kota/Kab.",
                                         textController: txtKotaNamaController,
                                         textFocusNote: txtKotaNamaFocusNode,
                                         suffixIconOnPressed: listUPKota),

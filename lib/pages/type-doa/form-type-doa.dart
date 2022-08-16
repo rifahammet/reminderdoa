@@ -11,7 +11,7 @@ import 'package:doa/widgets/dropdown.dart';
 import 'package:doa/widgets/listup.dart';
 import 'package:doa/widgets/textbox.dart';
 import 'package:sweetalert/sweetalert.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart';
 
 class TypeDoaDialog {
   GlobalKey<FormState>? _key;
@@ -92,7 +92,7 @@ class TypeDoaDialog {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   title:  Text(
-                    "Form "+"tipe".tr(),
+                    "Form Kategori",
                   ),
                   centerTitle: true,
                   bottom: PreferredSize(
@@ -142,7 +142,7 @@ class TypeDoaDialog {
                                 children: <Widget>[
                                   TextBox().textboxWithBorderValidate(
                                     context,
-                                    label: "tipe_name".tr(),
+                                    label: "Nama Kategori",
                                     textController: txtNamaController,
                                     textChange: changeTextField,
                                     textFocusNote: txtNamaFocusNode,
@@ -195,7 +195,7 @@ class TypeDoaDialog {
                         ),
                         padding: const EdgeInsets.all(10.0),
                         child:  Text(
-                          "save".tr(),
+                          "Simpan",
                           style: TextStyle(fontSize: 20),
                         ),
                       ),
@@ -203,7 +203,7 @@ class TypeDoaDialog {
                         if (_key!.currentState!.validate()) {
                           _key!.currentState!.save();
                           SweetAlert.show(context,
-                              subtitle: "please_wait".tr(),
+                              subtitle: "please wait..",
                               style: SweetAlertStyle.loading);
                           var dataSave;
                           dataSave = isEdit?<dynamic, dynamic>{
