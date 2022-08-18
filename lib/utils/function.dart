@@ -185,7 +185,7 @@ Uint8List FileImageToImage(pickedImage) {
     final _imageFile = ImageProcess.decodeImage(
       imagePath.readAsBytesSync(),
     );
-    return base64Encode(ImageProcess.encodePng(_imageFile));
+    return base64Encode(ImageProcess.encodePng(_imageFile!));
   }
 
   Uint8List StringToImage(imageString) {

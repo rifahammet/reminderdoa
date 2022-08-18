@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "900838497953-ohbdjgrqm11r8g0b1rvsq4q4bi29bebo.apps.googleusercontent.com",
+          "client_id": "900838497953-avtsbnbkkira3dnuhni1f48taun9f8af.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.onethinklogic.doamuslim",
-            "certificate_hash": "4da8c1e2c3a1169016411e0e28c7786efb33411c"
+            "certificate_hash": "1764f4e81726ffd85440243f90b6dcd28145058e"
           }
         },
         {

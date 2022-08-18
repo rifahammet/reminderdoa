@@ -1,6 +1,7 @@
 // import 'package:onelogic/Utilities/app_localizations.dart';
 // import 'package:onelogic/Utilities/pref_manager.dart';
 
+import 'package:doa/utils/authentication.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:io';
@@ -136,25 +137,21 @@ class _AppDrawerState extends State<AppDrawer> {
       children: [
         _createHeader(context),
         _createDrawerItem(
-                      icon: Icons.home,
-                      text: 'Dashboard',
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => Container()),
-                        );
-                      },
-                    ),
-                    Divider(),
+          icon: Icons.home,
+          text: 'Dashboard',
+          onTap: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Container()),
+            );
+          },
+        ),
+        Divider(),
         Expanded(
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
-              Visibility(
-                  visible: isExpired,
-                  child: Column(children: [
-                    
-                  ])),
+              Visibility(visible: isExpired, child: Column(children: [])),
               _createDrawerItem(
                 icon: Icons.info,
                 text: 'About Us',
@@ -305,8 +302,9 @@ class _AppDrawerState extends State<AppDrawer> {
         _createDrawerItem(
             icon: Icons.logout,
             text: 'Logout',
-            onTap: () {
+            onTap: () async {
               Prefs.clear();
+              await Authentication.signOut(context: context);
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => LoginPage()),

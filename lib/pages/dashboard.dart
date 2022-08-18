@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:doa/utils/authentication.dart';
 import 'package:intl/intl.dart';
 import 'package:optimize_battery/optimize_battery.dart';
 // import 'dart:async';
@@ -36,7 +38,6 @@ import 'package:doa/pages/approval-store-sampah-admin/approval-store-sampah-admi
 import 'package:doa/pages/approval-store-sampah/approval-store-sampah.dart';
 import 'package:doa/pages/cash-bank/cash-bank.dart';
 import 'package:doa/pages/change_password/change_password.dart';
-import 'package:doa/pages/dashboard1.dart';
 import 'package:doa/pages/login/login.dart';
 import 'package:doa/pages/onboarding.dart';
 // import 'package:doa/pages/pembayaran-penarikan-dana/pembayaran-penarikan-dana.dart';
@@ -71,9 +72,10 @@ import 'package:path_provider/path_provider.dart';
 // ignore: import_of_legacy_library_into_null_safe
 //import 'package:sticky_headers/sticky_headers/widget.dart';
 import 'package:sweetalert/sweetalert.dart';
+
 // import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 // import 'package:workmanager/workmanager.dart';
-
+StreamSubscription<LocationData>? locationSubscription;
 String? selectedNotificationPayload;
 dynamic contek;
 
@@ -81,8 +83,7 @@ dynamic contek;
 // late String _currentAddress;
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'moslem_doa_reminder', // id
-  'Moslem Doa Reminder', // title
-  'Reminder Doa Muslim', // Description
+  "Moslem's Doa Reminder",
   importance: Importance.max,
   enableLights: true,
   playSound: true,
@@ -311,7 +312,7 @@ class _DashboardPageState extends State<DashboardPage> {
       geo.Placemark place = placemarks[0];
       print(
           "${place.subAdministrativeArea}, ${place.postalCode}, ${place.country}");
-      String kota = place.subAdministrativeArea
+      String kota = place.subAdministrativeArea!
           .replaceAll("Kabupaten ", "")
           .replaceAll("Kota ", "")
           .replaceAll(" Regency", "")
@@ -409,9 +410,9 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     var permission = await location.hasPermission();
-    if (permission == PermissionStatus.DENIED) {
+    if (permission == PermissionStatus.denied) {
       permission = await location.requestPermission();
-      if (permission != PermissionStatus.GRANTED) {
+      if (permission != PermissionStatus.granted) {
         return;
       } else {
         batterySetting();
@@ -423,7 +424,8 @@ class _DashboardPageState extends State<DashboardPage> {
     var loc = await location.getLocation();
     print("${loc.latitude} ${loc.longitude}");
     _getAddressFromLatLng(loc);
-    location.onLocationChanged().listen((LocationData loc) {
+    locationSubscription =
+        location.onLocationChanged.listen((LocationData loc) {
       _getAddressFromLatLng(loc);
     });
   }
@@ -492,11 +494,9 @@ class _DashboardPageState extends State<DashboardPage> {
 
       FirebaseMessaging.instance
           .getInitialMessage()
-          .then((RemoteMessage message) {
-        if (message != null) {
-          String payload = message.data['payload'];
-          handleClickMessage(payload);
-        }
+          .then((RemoteMessage? message) {
+        String payload = message?.data['payload'];
+        handleClickMessage(payload);
       });
 
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -821,7 +821,7 @@ class _DashboardPageState extends State<DashboardPage> {
         case 1:
           await showDialog(
             context: context,
-            builder: (BuildContext context) => new ProfileDialog()
+            builder: (BuildContext context) => ProfileDialog()
                 .buildAddDialog(
                     context, this, Prefs.getInt("userId"), true, true),
           );
@@ -829,7 +829,7 @@ class _DashboardPageState extends State<DashboardPage> {
         case 2:
           await showDialog(
             context: context,
-            builder: (BuildContext context) => new ChangePasswordDialog()
+            builder: (BuildContext context) => ChangePasswordDialog()
                 .buildAddDialog(
                     context, this, true, Prefs.getString("user_pass")),
           );
@@ -841,7 +841,12 @@ class _DashboardPageState extends State<DashboardPage> {
           );
           break;
         case 4:
+          if(locationSubscription!=null) locationSubscription!.cancel();
+          var dataSave = <dynamic, dynamic>{"firebase_token": null};
+          var where = <dynamic, dynamic>{"id": Prefs.getInt("userId")};
+          ApiUtilities().updateData(dataSave, "signup", where: where);
           Prefs.clear();
+          await Authentication.signOut(context: context);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => LoginPage()),
@@ -1568,8 +1573,8 @@ bool isNumeric(String s) {
 }
 
 void handleClickMessage(String? payload) async {
-  var now = new DateTime.now();
-  var formatter = new DateFormat('yyyy-MM-dd');
+  var now = DateTime.now();
+  var formatter = DateFormat('yyyy-MM-dd');
   String formattedDate = formatter.format(now);
   if (payload != null) {
     if (isNumeric(payload)) {
@@ -1749,12 +1754,12 @@ class NotificationForegroundService {
         InitializationSettings(android: androidInitializationSettings);
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: (String payload) async {
+        onSelectNotification: (String? payload) async {
       handleClickMessage(payload);
     });
     final NotificationAppLaunchDetails? notificationAppLaunchDetails =
         await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
-    String payload = notificationAppLaunchDetails!.payload;
+    String? payload = notificationAppLaunchDetails!.payload;
     handleClickMessage(payload);
   }
 
@@ -1800,8 +1805,8 @@ class NotificationForegroundService {
           ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
           notification = PushNotification(
               payload: message.data['payload'],
-              title: message.notification.title,
-              body: message.notification.body);
+              title: message.notification!.title,
+              body: message.notification!.body);
         } else {
           var dataSave = <dynamic, dynamic>{
             "json": "Cancel Notif user ID :" +
@@ -1843,8 +1848,8 @@ class NotificationForegroundService {
           ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
           notification = PushNotification(
               payload: message.data['payload'],
-              title: message.notification.title,
-              body: message.notification.body);
+              title: message.notification!.title,
+              body: message.notification!.body);
         } else {
           var dataSave = <dynamic, dynamic>{
             "json": "Cancel Notif user ID :" +
@@ -1892,7 +1897,6 @@ class NotificationForegroundService {
             android: AndroidNotificationDetails(
               channel.id,
               channel.name,
-              channel.description,
               playSound: true,
               sound: const RawResourceAndroidNotificationSound('auzubillah'),
               importance: Importance.max,

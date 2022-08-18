@@ -276,7 +276,7 @@ displayTanggallahir(formatDate, formatYear) {
                               textFocusNote: txtPropinsiNamaFocusNode,
                               suffixIconOnPressed: listUPPropinsi),
                           ListUp().listUpWithBorderValidate(context,
-                              label: "Kota",
+                              label: "Kota/Kab.",
                               textController: txtKotaNamaController,
                               textFocusNote: txtKotaNamaFocusNode,
                               suffixIconOnPressed: listUPKota),

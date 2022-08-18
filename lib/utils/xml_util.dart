@@ -51,7 +51,7 @@ class XML {
     final builder = XmlBuilder();
     buildBook(builder, 'The War of the Worlds', 'en', 12.50);
     buildBook(builder, 'Voyages extraordinaries', 'fr', 18.20);
-    document.firstElementChild.children.add(builder.buildFragment());
+    document.firstElementChild!.children.add(builder.buildFragment());
   }
 
   void buildBook(XmlBuilder builder, String title, String language, num price) {

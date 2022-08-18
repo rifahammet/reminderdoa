@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:date_format/date_format.dart';
 import 'package:doa/pages/listups/listup-kota.dart';
 import 'package:doa/pages/listups/listup-propinsi.dart';
 import 'package:flutter/material.dart';
-// import 'package:doa/pages/listups/listup-kategori-barang.dart';
+import 'package:doa/widgets/datepicker.dart';
 import 'package:doa/pages/listups/listupt-bank-sampah..dart';
 import 'package:doa/utils/api-utility.dart';
 import 'package:doa/utils/api.dart';
@@ -22,6 +23,8 @@ class ProfileDialog {
   int id = 0;
   bool isAktif = true;
   String api_id = '';
+  String? tanggalLahir;
+  final txtTanggalLahirController = TextEditingController();
   final txtNamaLengkapController = TextEditingController();
   final txtEmailController = TextEditingController();
   final txtNomorTelpController = TextEditingController();
@@ -75,19 +78,19 @@ class ProfileDialog {
   Widget buildAddDialog(BuildContext context, sourceForm, dynamic data,
       bool isEdit, bool isView) {
     _key = GlobalKey();
-
+    txtTanggalLahirController.text = formatDate(
+                                  DateTime.now(), [dd, '-', mm, '-', yyyy]);
+                              tanggalLahir = Fungsi().fmtDateTimeYearNow();
     {
-//       /* warna */
-//       // Color color = new Color(0x12345678);
-//       // String colorString = color.toString(); // Color(0x12345678)
-//       // String valueString =
-//       //     colorString.split('(0x')[1].split(')')[0]; // kind of hacky..
-//       // int value = int.parse(valueString, radix: 16);
-//       // Color otherColor = new Color(value);
-// /* end warna */
-
       return StatefulBuilder(builder: (context, setState) {
         /* call back */
+        displayTanggallahir(formatDate, formatYear) {
+          setState(() {
+            tanggalLahir = formatYear.toString();
+            txtTanggalLahirController.text = formatDate.toString();
+            print('tanggal=' + formatDate.toString());
+          });
+        }
 
         // ignore: non_constant_identifier_names
         changeTextField(pil, val) {
@@ -159,6 +162,8 @@ class ProfileDialog {
                                   snapshot.data["prop_nama"];
                               txtPropinsiKodeController.text =
                                   snapshot.data["prop_kode"];
+                              txtTanggalLahirController.text =
+                                  snapshot.data["birthday"];
                               txtNomorTelpController.text = snapshot.data["hp"];
                               txtUserTypeController.text =
                                   snapshot.data["user_type"];
@@ -178,6 +183,7 @@ class ProfileDialog {
                               txtNamaLengkapController.text = "";
                               txtPropinsiKodeController.text = "";
                               txtPropinsiNamaController.text = "";
+                              txtTanggalLahirController.text = "";
                               txtNomorTelpController.text = "";
                               txtUserTypeController.text = "";
                               txtKotaNamaController.text = "";
@@ -217,20 +223,13 @@ class ProfileDialog {
                                         textController: txtKotaNamaController,
                                         textFocusNote: txtKotaNamaFocusNode,
                                         suffixIconOnPressed: listUPKota),
-                                    // TextBox().textboxWithBorderValidate(
-                                    //   context,
-                                    //   label: "Propinsi",
-                                    //   textController: txtPropinsiNamaController,
-                                    //   textChange: changeTextField,
-                                    //   textFocusNote: txtPropinsiNamaFocusNode,
-                                    // ),
-                                    // TextBox().textboxWithBorderValidate(
-                                    //   context,
-                                    //   label: "Kota",
-                                    //   textController: txtKotaNamaController,
-                                    //   textChange: changeTextField,
-                                    //   textFocusNote: txtKotaNamaFocusNode,
-                                    // ),
+                                    DatePicker().datePickerBorder(
+                                      context,
+                                      textController: txtTanggalLahirController,
+                                      label: "Tanggal Lahir",
+                                      fungsiCallback: displayTanggallahir,
+                                      formatDate: tanggalLahir,
+                                    ),
                                     TextBox().textboxWithBorderValidate(
                                       context,
                                       label: "Nomor Telepon",
@@ -314,6 +313,7 @@ class ProfileDialog {
                                                 txtPropinsiKodeController.text,
                                             "kota_kode":
                                                 txtKotaKodeController.text,
+                                            "birthday": tanggalLahir,
                                             "hp": txtNomorTelpController.text
                                           }
                                         : {
@@ -323,35 +323,6 @@ class ProfileDialog {
                                   ]
                                 }
                               },
-                              // {
-                              //   "userprofile": {
-                              //     "action":  isEdit ? "update" : "new",
-                              //     "data": [
-                              //       isEdit ?
-                              //       {
-                              //         "id": userProfileId,
-                              //         "user_fullname":
-                              //             txtNamaLengkapController.text,
-                              //         "hp": txtNomorTelpController.text,
-                              //         //"alamat": txtAlamatController.text,
-                              //        // "bank_id": Prefs.getInt("bank_id"),
-                              //         "email":txtEmailController.text,
-                              //         // "nomor_rekening":txtNomorRekeningController.text,
-                              //         // "nama_bank": txtNamaBankController.text
-                              //       }:
-                              //       {
-                              //         "user_fullname":
-                              //             txtNamaLengkapController.text,
-                              //         "hp": txtNomorTelpController.text,
-                              //         //"alamat": txtAlamatController.text,
-                              //         //"bank_id": Prefs.getInt("bank_id"),
-                              //         "email":txtEmailController.text,
-                              //         // "nomor_rekening":txtNomorRekeningController.text,
-                              //         // "nama_bank": txtNamaBankController.text
-                              //       }
-                              //     ]
-                              //   }
-                              // }
                             ];
                             ApiUtilities().saveUpdateBatchData(
                                 context: context,
