@@ -1,17 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:date_format/date_format.dart';
 import 'package:doa/pages/listups/listup-kota.dart';
 import 'package:doa/pages/listups/listup-propinsi.dart';
 import 'package:flutter/material.dart';
 import 'package:doa/widgets/datepicker.dart';
-import 'package:doa/pages/listups/listupt-bank-sampah..dart';
 import 'package:doa/utils/api-utility.dart';
-import 'package:doa/utils/api.dart';
 import 'package:doa/utils/function.dart';
 import 'package:doa/utils/pref_manager.dart';
-import 'package:doa/widgets/checkbox.dart';
-import 'package:doa/widgets/dropdown.dart';
 import 'package:doa/widgets/listup.dart';
 import 'package:doa/widgets/textbox.dart';
 import 'package:sweetalert/sweetalert.dart';
@@ -78,9 +73,9 @@ class ProfileDialog {
   Widget buildAddDialog(BuildContext context, sourceForm, dynamic data,
       bool isEdit, bool isView) {
     _key = GlobalKey();
-    txtTanggalLahirController.text = formatDate(
-                                  DateTime.now(), [dd, '-', mm, '-', yyyy]);
-                              tanggalLahir = Fungsi().fmtDateTimeYearNow();
+    txtTanggalLahirController.text =
+        formatDate(DateTime.now(), [dd, '-', mm, '-', yyyy]);
+    tanggalLahir = Fungsi().fmtDateTimeYearNow();
     {
       return StatefulBuilder(builder: (context, setState) {
         /* call back */

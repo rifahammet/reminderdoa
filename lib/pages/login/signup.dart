@@ -8,11 +8,9 @@ import 'package:doa/pages/listups/listup-kecamatan.dart';
 import 'package:doa/pages/listups/listup-kelurahan.dart';
 import 'package:doa/pages/listups/listup-kota.dart';
 import 'package:doa/pages/listups/listup-propinsi.dart';
-import 'package:doa/pages/login/login.dart';
 import 'package:doa/utils/api-utility.dart';
 import 'package:doa/utils/api.dart';
 import 'package:doa/utils/function.dart';
-import 'package:doa/widgets/dropdown.dart';
 import 'package:doa/widgets/listup.dart';
 import 'package:doa/widgets/textbox.dart';
 // ignore: import_of_legacy_library_into_null_safe
@@ -75,9 +73,9 @@ class RegisterDialog {
     txtUserNameController.text = '';
     txtEmailController.text = '';
     txtPropinsiNamaController.text = '';
-    txtTanggalLahirController.text = formatDate(
-                                  DateTime.now(), [dd, '-', mm, '-', yyyy]);
-                              tanggalLahir = Fungsi().fmtDateTimeYearNow();
+    txtTanggalLahirController.text =
+        formatDate(DateTime.now(), [dd, '-', mm, '-', yyyy]);
+    tanggalLahir = Fungsi().fmtDateTimeYearNow();
 
     // ignore: avoid_print
     return StatefulBuilder(builder: (context, setState) {
@@ -145,13 +143,13 @@ class RegisterDialog {
         }
       }
 
-displayTanggallahir(formatDate, formatYear) {
-          setState(() {
-            tanggalLahir = formatYear.toString();
-            txtTanggalLahirController.text = formatDate.toString();
-            print('tanggal=' + formatDate.toString());
-          });
-        }
+      displayTanggallahir(formatDate, formatYear) {
+        setState(() {
+          tanggalLahir = formatYear.toString();
+          txtTanggalLahirController.text = formatDate.toString();
+          print('tanggal=' + formatDate.toString());
+        });
+      }
 
       changeTextField(pil, val) {
         setState(() {});
@@ -173,51 +171,50 @@ displayTanggallahir(formatDate, formatYear) {
         });
       }
 
-        callBackButton(data) async {
-                            SweetAlert.show(context,
-                                subtitle: "please_wait",
-                                style: SweetAlertStyle.loading);
-                            var bodyEmail;
-                              bodyEmail =
-                                  "<p>Account anda sudah diaktifkan dan dapat digunakan.</p><p>user name login dan password anda adalah :</p><p>User Name : " +
-                                      data['email'].toString() +
-                                      " </p><p>password : " +
-                                      data['password_default'].toString() +
-                                      "</p><p>Silahkan login menggunakan username dan password tersebut. Terima kasih.</p>";
-                            callBackEmail(isSended) async {
-                              if (isSended) {
-                                print('data save='+data.toString());
-                               // print(isEdit.toString());
-                                ApiUtilities().saveUpdateData(
-                                    context: context,
-                                    data: data,
-                                    namaAPI: "signup",
-                                    isEdit: false,
-                                    setState: setState,
-                                  isMoreHide: true);
-                              } else {
-                                SweetAlert.show(
-                                  context,
-                                  title: "Warning",
-                                  subtitle:
-                                      "Terjadi kesalahan pada saat kirim data, silahkan tekan tombol save kembali",
-                                  style: SweetAlertStyle.loadingerror,
-                                );
-                                await Future.delayed(new Duration(seconds: 3),
-                                    () {
-                                  Navigator.of(context).pop();
-                                });
-                              }
-                            }
-                              EmailUtility().kirimEmail(
-                                  context: context,
-                                  alamatEmail: data['email'].toString(),
-                                  bodyEmail: bodyEmail,
-                                  isEmailOnly: false,
-                                  isNoReply: true,
-                                  judulEmail: "Validasi Aplikasi Doa",
-                                  callBack: callBackEmail);
-  }
+      callBackButton(data) async {
+        SweetAlert.show(context,
+            subtitle: "please_wait", style: SweetAlertStyle.loading);
+        var bodyEmail;
+        bodyEmail =
+            "<p>Account anda sudah diaktifkan dan dapat digunakan.</p><p>user name login dan password anda adalah :</p><p>User Name : " +
+                data['email'].toString() +
+                " </p><p>password : " +
+                data['password_default'].toString() +
+                "</p><p>Silahkan login menggunakan username dan password tersebut. Terima kasih.</p>";
+        callBackEmail(isSended) async {
+          if (isSended) {
+            print('data save=' + data.toString());
+            // print(isEdit.toString());
+            ApiUtilities().saveUpdateData(
+                context: context,
+                data: data,
+                namaAPI: "signup",
+                isEdit: false,
+                setState: setState,
+                isMoreHide: true);
+          } else {
+            SweetAlert.show(
+              context,
+              title: "Warning",
+              subtitle:
+                  "Terjadi kesalahan pada saat kirim data, silahkan tekan tombol save kembali",
+              style: SweetAlertStyle.loadingerror,
+            );
+            await Future.delayed(new Duration(seconds: 3), () {
+              Navigator.of(context).pop();
+            });
+          }
+        }
+
+        EmailUtility().kirimEmail(
+            context: context,
+            alamatEmail: data['email'].toString(),
+            bodyEmail: bodyEmail,
+            isEmailOnly: false,
+            isNoReply: true,
+            judulEmail: "Validasi Aplikasi Doa",
+            callBack: callBackEmail);
+      }
       /* end call back */
 
       return Form(
@@ -230,7 +227,7 @@ displayTanggallahir(formatDate, formatYear) {
                   icon: const Icon(Icons.close, color: Colors.yellow),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
-                title:  Text("Pendaftaran User"),
+                title: Text("Pendaftaran User"),
                 centerTitle: true,
                 bottom: PreferredSize(
                     child: Column(children: [
@@ -281,14 +278,12 @@ displayTanggallahir(formatDate, formatYear) {
                               textFocusNote: txtKotaNamaFocusNode,
                               suffixIconOnPressed: listUPKota),
                           DatePicker().datePickerBorder(
-                                      context,
-                                      textController:
-                                          txtTanggalLahirController,
-                                      label: "Tanggal Lahir" + " *",
-                                      fungsiCallback: displayTanggallahir,
-                                      formatDate: tanggalLahir,
-                                      
-                                    ),
+                            context,
+                            textController: txtTanggalLahirController,
+                            label: "Tanggal Lahir" + " *",
+                            fungsiCallback: displayTanggallahir,
+                            formatDate: tanggalLahir,
+                          ),
                           TextBox().textboxWithBorderValidate(context,
                               label: "Email",
                               textController: txtEmailController,
@@ -301,34 +296,42 @@ displayTanggallahir(formatDate, formatYear) {
                               textChange: changeTextField,
                               textFocusNote: txtPhoneFocusNode,
                               isMandatory: true),
-                              SizedBox(height: 5,),
-                              Padding(padding: EdgeInsets.only(left: 10,right: 10), child:
-                              Container(
-                              
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.red[100],
-                        border: Border.all(
-                          color: Colors.red,
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(children: [
-Text(
-                        '*** Perhatian ***',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.red[900],fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 3,),
-                      Text(
-                        'User Name dan Password dikirim melalui email anda',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.red[900]),
-                      ),
-                      ],)
-                      
-                    ))
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Padding(
+                              padding: EdgeInsets.only(left: 10, right: 10),
+                              child: Container(
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: Colors.red[100],
+                                    border: Border.all(
+                                      color: Colors.red,
+                                      width: 1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        '*** Perhatian ***',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Colors.red[900],
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        height: 3,
+                                      ),
+                                      Text(
+                                        'User Name dan Password dikirim melalui email anda',
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            TextStyle(color: Colors.red[900]),
+                                      ),
+                                    ],
+                                  )))
                           // const Divider(
                           //   thickness: 1.0,
                           // ),
@@ -343,9 +346,6 @@ Text(
                           //   textFocusNote: txtUserNameFocusNode,
                           // ),
 
-                        
-                          
-                          
                           // ListUp().listUpWithBorderValidate(context,
                           //     label: "Kecamatan",
                           //     textController: txtKecamatanNamaController,
@@ -405,7 +405,7 @@ Text(
                           ),
                         ),
                         padding: EdgeInsets.all(10.0),
-                        child:  Text(
+                        child: Text(
                           "Daftar",
                           style: TextStyle(fontSize: 20),
                         ),
@@ -413,44 +413,45 @@ Text(
                       onPressed: () async {
                         if (_key!.currentState!.validate()) {
                           _key!.currentState!.save();
-                              SweetAlert.show(context,
-        subtitle: "please_wait", style: SweetAlertStyle.loading);
-        String vPassword = randomAlphaNumeric(5);
-    // var dataSave = <dynamic, dynamic>{
-    //             "user_password": Fungsi().strToMD5(vPassword).substring(0, 25).toString(),
-    //             "user_fullname" : txtBankNameController.text,
-    //             "password_default": vPassword,
-    //             "hp" : txtPhoneController.text,
-    //             "email" : txtEmailController.text,
-    //             "birthday" : tanggalLahir,
-    //             "prop_kode" : txtPropinsiKodeController.text,
-    //             "kota_kode" : txtKotaKodeController.text,
-    //             "user_type" : "user"
-      
-    // };
-    var dataSave = <dynamic, dynamic>{
-                "user_password": Fungsi().strToMD5(vPassword).toString(),
-                "user_fullname" : txtBankNameController.text,
-                "password_default": vPassword,
-                "hp" : txtPhoneController.text,
-                "email" : txtEmailController.text,
-                "birthday" : tanggalLahir,
-                "prop_kode" : txtPropinsiKodeController.text,
-                "kota_kode" : txtKotaKodeController.text,
-                "user_type" : "user",
-                "approved": 1,
-                "approved_email": 1,
-                "daftar_baru" : 0,
-                "isActive": 1,
-      
-    };
-    callBackButton(dataSave);
-    // ApiUtilities().saveUpdateData(
-    //                             context: context,
-    //                             data: dataSave,
-    //                             namaAPI: "signup",
-    //                             isEdit: false,
-    //                             setState: setState);
+                          SweetAlert.show(context,
+                              subtitle: "please_wait",
+                              style: SweetAlertStyle.loading);
+                          String vPassword = randomAlphaNumeric(5);
+                          // var dataSave = <dynamic, dynamic>{
+                          //             "user_password": Fungsi().strToMD5(vPassword).substring(0, 25).toString(),
+                          //             "user_fullname" : txtBankNameController.text,
+                          //             "password_default": vPassword,
+                          //             "hp" : txtPhoneController.text,
+                          //             "email" : txtEmailController.text,
+                          //             "birthday" : tanggalLahir,
+                          //             "prop_kode" : txtPropinsiKodeController.text,
+                          //             "kota_kode" : txtKotaKodeController.text,
+                          //             "user_type" : "user"
+
+                          // };
+                          var dataSave = <dynamic, dynamic>{
+                            "user_password":
+                                Fungsi().strToMD5(vPassword).toString(),
+                            "user_fullname": txtBankNameController.text,
+                            "password_default": vPassword,
+                            "hp": txtPhoneController.text,
+                            "email": txtEmailController.text,
+                            "birthday": tanggalLahir,
+                            "prop_kode": txtPropinsiKodeController.text,
+                            "kota_kode": txtKotaKodeController.text,
+                            "user_type": "user",
+                            "approved": 1,
+                            "approved_email": 1,
+                            "daftar_baru": 0,
+                            "isActive": 1,
+                          };
+                          callBackButton(dataSave);
+                          // ApiUtilities().saveUpdateData(
+                          //                             context: context,
+                          //                             data: dataSave,
+                          //                             namaAPI: "signup",
+                          //                             isEdit: false,
+                          //                             setState: setState);
                           // Navigator.of(context).pop();
                         } else {
                           setState(() {
@@ -462,6 +463,4 @@ Text(
                   )))));
     });
   }
-
-
 }

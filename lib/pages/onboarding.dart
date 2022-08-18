@@ -1,15 +1,11 @@
 import 'dart:async';
 import 'dart:isolate';
-import 'dart:ui';
-import 'package:doa/utils/api-utility.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:doa/pages/dashboard.dart';
 import 'package:doa/pages/login/login.dart';
 import 'package:doa/utils/api.dart';
 import 'package:doa/utils/pref_manager.dart';
 import 'package:doa/utils/xml_util.dart';
-import 'package:doa/widgets/button.dart';
 import 'package:doa/widgets/show-dialog.dart';
 import 'package:doa/widgets/textbox.dart';
 
@@ -27,42 +23,17 @@ class _OnboardingState extends State<Onboarding> {
         var expired_date = DateTime.parse(Prefs.getString('expired_date'));
         var now = new DateTime.now();
         if (expired_date.compareTo(now) <= 0) Prefs.setBool("isExpired", true);
-        
       }
       Timer(
-          Duration(seconds: 3),
+          const Duration(seconds: 3),
           () => Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (context) => DashboardPage())));
     } else {
       Timer(
-          Duration(seconds: 3),
+          const Duration(seconds: 3),
           () => Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => LoginPage())));
     }
-    //  if (Prefs.getBool("isLogged")) {
-    //     if (Prefs.getBool("isExpired")) {
-    //       Navigator.pushReplacement(
-    //         context,
-    //         MaterialPageRoute(builder: (context) => DashboardPage()),
-    //       );
-    //     } else {
-    //       //print("expired :"+Prefs.getString('expired_date'));
-    //       var expired_date = DateTime.parse(Prefs.getString('expired_date'));
-    //       var now = new DateTime.now();
-    //       if (expired_date.compareTo(now) <= 0) {
-    //         Prefs.setBool("isExpired", true);
-    //       }
-    //       Navigator.pushReplacement(
-    //         context,
-    //         MaterialPageRoute(builder: (context) => DashboardPage()),
-    //       );
-    //     }
-    //   } else {
-    //     Navigator.pushReplacement(
-    //       context,
-    //       MaterialPageRoute(builder: (context) => LoginPage()),
-    //     );
-    //   }
   }
 
   int progress = 0;
@@ -124,10 +95,7 @@ class _OnboardingState extends State<Onboarding> {
   }
 
   changeTextField(pil, val) {
-    setState(() {
-      // ignore: avoid_print
-      print("pilihan=" + pil.toString() + " - value = " + val.toString());
-    });
+    setState(() {});
   }
 
   @override
@@ -139,7 +107,7 @@ class _OnboardingState extends State<Onboarding> {
           width: MediaQuery.of(context).size.width / 1.2,
           child: Column(
             children: <Widget>[
-              SizedBox(
+              const SizedBox(
                 height: 40,
               ),
               Expanded(
@@ -151,54 +119,14 @@ class _OnboardingState extends State<Onboarding> {
                     width: 200,
                     height: 200,
                   ),
-
-//                    Stack(
-//                     alignment: Alignment.center,
-//                     children: [
-
-//                       Column(children: [
-//                         SizedBox(
-//                 height: 180,
-//               ),
-// Text(
-//                       'Kumpulan',
-//                       style: TextStyle(
-//                           fontSize: 32,
-//                           fontWeight: FontWeight.w500,
-//                           color: Colors.grey[700]),
-//                     ),
-//                     Text(
-//                       'Doa-Doa',
-//                       style: TextStyle(
-//                           fontSize: 32,
-//                           fontWeight: FontWeight.w500,
-//                           color: Colors.grey[500]),
-//                     ),
-//                       ],)
-
-//                     ]),
                 ),
               ),
-
-              //  SizedBox(
-              //   height: 120,
-              // ),
-              // Expanded(
-              //   flex: 6,
-              //   child: Hero(
-              //     tag: 'Clipboard1',
-              //     child: Image.asset('assets/images/doa.png', width: 150, height: 200,),
-              //   ),
-              // ),
-              // SizedBox(
-              //   height: 10,
-              // ),
               Expanded(
                 flex: 2,
                 child: Column(
                   children: <Widget>[
-                    SizedBox(height: 10),
-                    Text(
+                    const SizedBox(height: 10),
+                    const Text(
                       'Moslem\'s',
                       style: TextStyle(
                           fontSize: 32,
@@ -212,7 +140,7 @@ class _OnboardingState extends State<Onboarding> {
                           if (_condition) {
                             setState(() => _condition = false);
                             Timer(
-                                Duration(seconds: 5),
+                                const Duration(seconds: 5),
                                 () => setState(() {
                                       _condition = true;
                                       _hit = 0;
@@ -274,7 +202,7 @@ class _OnboardingState extends State<Onboarding> {
                               istimer!.cancel();
                             }
                             istimer = Timer(
-                                Duration(seconds: 5),
+                                const Duration(seconds: 5),
                                 () => setState(() {
                                       _hit = 0;
                                       print('dari nol lagi ya !!!');
@@ -282,12 +210,11 @@ class _OnboardingState extends State<Onboarding> {
 
                             setState(() {
                               _hit = _hit + 1;
-                              print('klik ke -' + _hit.toString());
                             });
                           }
                         } // disable onTap if condition is false
                       },
-                      child: Text(
+                      child: const Text(
                         'Doa Reminder',
                         style: TextStyle(
                             fontSize: 22,

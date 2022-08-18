@@ -22,14 +22,6 @@
           }
         },
         {
-          "client_id": "900838497953-lfl6k4e7liu44unrmrnp4n9jbs8irf0n.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.onethinklogic.doamuslim",
-            "certificate_hash": "4da8c1e2c3a1169016411e0e28c7786efb33411c"
-          }
-        },
-        {
           "client_id": "900838497953-j1cdafbt1b5indfhru9abntlr7nodrru.apps.googleusercontent.com",
           "client_type": 3
         }

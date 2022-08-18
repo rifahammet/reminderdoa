@@ -1,12 +1,11 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:doa/pages/login/forgot-password.dart';
+import 'package:doa/pages/login/google-info.dart';
+
 import 'package:doa/utils/authentication.dart';
 import 'package:doa/utils/email_util.dart';
-import 'package:doa/widgets/label.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 // import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:doa/pages/change_password/change_password.dart';
@@ -18,15 +17,13 @@ import 'package:doa/utils/pref_manager.dart';
 import 'package:doa/widgets/blury-container.dart';
 import 'package:doa/widgets/button.dart';
 import 'package:doa/widgets/textbox.dart';
-import 'package:flutter/rendering.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/intl.dart';
 import 'package:geocoding/geocoding.dart' as geo;
 import 'package:location/location.dart';
 import 'package:random_string/random_string.dart';
 // import 'package:proste_bezier_curve/proste_bezier_curve.dart';
 import 'package:sweetalert/sweetalert.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -55,7 +52,9 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
           ),
         ),
         onPressed: () async {
-          _initLocationService(context);
+          if (await _initLocationService(context)) {
+            googleLogin(context);
+          }
         },
         child: Padding(
           padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
@@ -110,19 +109,19 @@ _getAddressFromLatLng(BuildContext context, currentPosition) async {
       Prefs.setString("kota_kode", record['kota_kode']);
       Prefs.setString("prop_kode", record['prop_kode']);
       Prefs.setString("api_id", record['api_id']);
-      googleLogin(context);
+      // googleLogin(context);
     }
   } catch (e) {
     print(e);
   }
 }
 
-Future _initLocationService(BuildContext context) async {
+Future<bool> _initLocationService(BuildContext context) async {
   var location = Location();
-  // await AndroidAutostart.navigateAutoStartSetting;
+
   if (!await location.serviceEnabled()) {
     if (!await location.requestService()) {
-      return;
+      return false;
     }
   }
 
@@ -130,7 +129,7 @@ Future _initLocationService(BuildContext context) async {
   if (permission == PermissionStatus.denied) {
     permission = await location.requestPermission();
     if (permission != PermissionStatus.granted) {
-      return;
+      return false;
     } else {
       final loc = await location.getLocation();
       _getAddressFromLatLng(context, loc);
@@ -139,15 +138,17 @@ Future _initLocationService(BuildContext context) async {
     final loc = await location.getLocation();
     _getAddressFromLatLng(context, loc);
   }
+  return true;
 }
 
-Future googleLogin(BuildContext context) async {
+void googleLogin(BuildContext context) async {
   bool isFirstLogged = false;
-  User? user = await Authentication.signInWithGoogle(context: context);
-
   var now = DateTime.now();
   var formatter = DateFormat('yyyy-MM-dd');
   String formattedDate = formatter.format(now);
+
+  User? user = await Authentication.signInWithGoogle(context: context);
+
   if (user != null) {
     String vPassword = randomAlphaNumeric(5);
     var data = <dynamic, dynamic>{"email": user.email, "isActive": 1};
@@ -175,7 +176,7 @@ Future googleLogin(BuildContext context) async {
         "isActive": 1,
       };
       await ApiUtilities().saveNewData(dataSave, "signup", "");
-      
+
       data = <dynamic, dynamic>{"email": user.email, "isActive": 1};
 
       dataUser =
@@ -218,10 +219,11 @@ Future googleLogin(BuildContext context) async {
             judulEmail: "Validasi Aplikasi Doa",
             callBack: callBackEmail);
       }
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardPage()),
+      // Phoenix.rebirth(context);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => UserInfoScreen(user: user),
+        ),
       );
     }
   }

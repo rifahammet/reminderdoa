@@ -77,11 +77,11 @@ class Authentication {
               await auth.signInWithCredential(credential);
           user = userCredential.user;
         } on FirebaseAuthException catch (e) {
-          if (e.code == 'account-exists-with-different-credential') {
-            print(e.code);
-          } else if (e.code == 'invalid-credential') {
-            print(e.code);
-          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            Authentication.customSnackBar(
+              content: e.code,
+            ),
+          );
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
             Authentication.customSnackBar(

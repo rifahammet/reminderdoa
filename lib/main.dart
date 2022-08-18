@@ -1,13 +1,11 @@
 // @dart=2.9
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 // import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:doa/pages/onboarding.dart';
-import 'package:doa/widgets/blury-container.dart';
-import 'package:doa/widgets/textbox.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 void main() async {
@@ -21,7 +19,11 @@ void main() async {
     ScreenBreakpoints(desktop: 800, tablet: 550, watch: 200),
   );
 
-  runApp(MyApp());
+  runApp(
+    Phoenix(
+      child: const MyApp(),
+    ),
+  );
   // runApp(EasyLocalization(
   //   child: MyApp(),
   //   supportedLocales: [

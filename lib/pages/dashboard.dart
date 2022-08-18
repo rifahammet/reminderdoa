@@ -9,15 +9,12 @@ import 'package:optimize_battery/optimize_battery.dart';
 // import 'package:auto_start_flutter/auto_start_flutter.dart';
 // import 'package:android_autostart/android_autostart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:bordered_text/bordered_text.dart';
-import 'package:doa/main.dart';
 import 'package:doa/pages/approval-users/approval-users.dart';
 import 'package:doa/pages/detail-doa/form-doa.dart';
 import 'package:doa/pages/detail-doa/form-multi-doa.dart';
 import 'package:doa/pages/master-doa/master-doa.dart';
 import 'package:doa/pages/type-doa/type-doa.dart';
 import 'package:doa/pages/user/user.dart';
-import 'package:doa/widgets/button.dart';
 import 'package:doa/widgets/datatable.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -29,42 +26,15 @@ import 'package:location/location.dart';
 // import 'package:geocoding/geocoding.dart';
 // import 'package:geolocator/geolocator.dart';
 
-import 'package:path/path.dart';
 import 'package:http/http.dart' as http;
-import 'package:doa/pages/Request-penarikan-dana/request-penarikan-dana.dart';
 import 'package:doa/pages/about-us/about-us.dart';
-import 'package:doa/pages/approval-penarikan-dana/approval-penarikan-dana.dart';
-import 'package:doa/pages/approval-store-sampah-admin/approval-store-sampah-admin.dart';
-import 'package:doa/pages/approval-store-sampah/approval-store-sampah.dart';
-import 'package:doa/pages/cash-bank/cash-bank.dart';
 import 'package:doa/pages/change_password/change_password.dart';
 import 'package:doa/pages/login/login.dart';
-import 'package:doa/pages/onboarding.dart';
 // import 'package:doa/pages/pembayaran-penarikan-dana/pembayaran-penarikan-dana.dart';
-import 'package:doa/pages/pendaftaran-anggota/pendaftaran-anggota.dart';
-import 'package:doa/pages/penjualan/penjualan.dart';
 import 'package:doa/pages/profile/profile.dart';
-import 'package:doa/pages/rekening-koran/rekening-koran-nasabah.dart';
-import 'package:doa/pages/rekening-koran/rekening-koran.dart';
-import 'package:doa/pages/saldo-akhir/saldo-akhir.dart';
-import 'package:doa/pages/saldo-awal/saldo-awal.dart';
-import 'package:doa/pages/satuan/satuan.dart';
-import 'package:doa/pages/store-sampah/store-sampah.dart';
 import 'package:doa/utils/api-utility.dart';
-import 'package:doa/utils/function.dart';
 import 'package:doa/utils/pref_manager.dart';
-import 'package:doa/widgets/blury-container.dart';
-import 'package:doa/widgets/checkbox.dart';
-import 'package:doa/widgets/datepicker.dart';
-import 'package:doa/widgets/drawer.dart';
-import 'package:doa/widgets/dropdown.dart';
-import 'package:doa/widgets/fl-chart.dart';
-import 'package:doa/widgets/future-builder.dart';
-import 'package:doa/widgets/horizontal-widget.dart';
-import 'package:doa/widgets/label.dart';
-import 'package:doa/widgets/pdf_viewer.dart';
 import 'package:doa/widgets/popupmenubutton.dart';
-import 'package:doa/widgets/textbox.dart';
 // import 'package:easy_localization/easy_localization.dart';
 import 'package:date_format/date_format.dart';
 import 'package:path_provider/path_provider.dart';
@@ -91,39 +61,7 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
 );
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
-// void callbackDispatcher() {
-//   Workmanager().executeTask((task, inputData) async {
-//     _getCurrentLocation();
-//     return Future.value(true);
-//   });
-// }
 
-// _getCurrentLocation() {
-//   Geolocator.getCurrentPosition(
-//           desiredAccuracy: LocationAccuracy.best,
-//           forceAndroidLocationManager: true)
-//       .then((Position position) {
-//     _currentPosition = position;
-//     _getAddressFromLatLng();
-//   }).catchError((e) {
-//     print(e);
-//   });
-// }
-
-// _getAddressFromLatLng() async {
-//   try {
-//     List<Placemark> placemarks = await placemarkFromCoordinates(
-//         _currentPosition.latitude, _currentPosition.longitude);
-
-//     Placemark place = placemarks[0];
-
-//     print("${place.locality}, ${place.postalCode}, ${place.country}");
-//   } catch (e) {
-//     print(e);
-//   }
-// }
-
-// ignore: use_key_in_widget_constructors
 class DashboardPage extends StatefulWidget {
   @override
   _DashboardPageState createState() => _DashboardPageState();
@@ -348,8 +286,8 @@ class _DashboardPageState extends State<DashboardPage> {
           ApiUtilities().updateData(dataSave, "signup", where: where);
 
           if (oldTopic != newTopic) {
-            _messaging.unsubscribeFromTopic("Sholat_" + oldTopic);
-            _messaging.unsubscribeFromTopic("Imsak_" + oldTopic);
+            _messaging.unsubscribeFromTopic("sholat_" + oldTopic);
+            _messaging.unsubscribeFromTopic("imsak_" + oldTopic);
             subscribeTopic(newTopic);
             print('Topic Updated!');
           }
@@ -821,9 +759,8 @@ class _DashboardPageState extends State<DashboardPage> {
         case 1:
           await showDialog(
             context: context,
-            builder: (BuildContext context) => ProfileDialog()
-                .buildAddDialog(
-                    context, this, Prefs.getInt("userId"), true, true),
+            builder: (BuildContext context) => ProfileDialog().buildAddDialog(
+                context, this, Prefs.getInt("userId"), true, true),
           );
           break;
         case 2:
@@ -841,7 +778,7 @@ class _DashboardPageState extends State<DashboardPage> {
           );
           break;
         case 4:
-          if(locationSubscription!=null) locationSubscription!.cancel();
+          if (locationSubscription != null) locationSubscription!.cancel();
           var dataSave = <dynamic, dynamic>{"firebase_token": null};
           var where = <dynamic, dynamic>{"id": Prefs.getInt("userId")};
           ApiUtilities().updateData(dataSave, "signup", where: where);
@@ -1420,133 +1357,6 @@ class _DashboardPageState extends State<DashboardPage> {
           ))
         ],
       ))
-      // Container(
-      //     height: 38.0,
-      //     padding: const EdgeInsets.only(left: 5, top: 5, bottom: 5),
-      //     alignment: Alignment.centerLeft,
-      //     child: Label().labelStatus(
-      //         label: "Daftar Menu",
-      //         borderRadius: 15.0,
-      //         width: 140.0,
-      //         warna: Colors.orange,
-      //         warnaBorder: Colors.yellow)),
-      // Expanded(
-      //     child: ListView.builder(
-      //   itemCount: listHeader.length,
-      //   itemBuilder: (context, index) {
-      //     return StickyHeader(
-      //         // header: Container(
-      //         //   height: 38.0,
-
-      //         //   color: Colors.grey[300],
-      //         //   padding:  const EdgeInsets.only(left: 5,top: 5, bottom: 5),
-      //         //   alignment: Alignment.centerLeft,
-      //         //   child:  Label().labelStatus(label: "Daftar Menu", borderRadius: 15.0,width: 100.0, warna: Colors.orange, warnaBorder: Colors.yellow)
-      //         //   ),
-      //         header: Container(),
-
-      //         // ignore: avoid_unnecessary_containers
-      //         // header: Container(
-      //         //   height: 7.0,
-      //         // ),
-      //         // ignore: avoid_unnecessary_containers
-      //         content: GridView.builder(
-      //           shrinkWrap: true,
-      //           physics: const NeverScrollableScrollPhysics(),
-      //           itemCount: listTitle.length,
-      //           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      //             crossAxisCount: 4,
-      //             childAspectRatio: 1,
-      //           ),
-      //           itemBuilder: (contxt, indx) {
-      //             return GestureDetector(
-      //                 onTap: () async {
-      //                   await Navigator.push(
-      //                     context,
-      //                     MaterialPageRoute(
-      //                         builder: (context) => isOwner
-      //                             ? listPageOwner[index]
-      //                             : isAdmin
-      //                                 ? listPageAdmin[indx]
-      //                                 : listPageUser[indx]),
-      //                   );
-      //                   setState(() {});
-      //                   print('diklik');
-      //                 },
-      //                 child: Card(
-      //                     color: Colors.grey[100],
-      //                     child: Column(children: [
-      //                       Expanded(
-      //                           child: Padding(
-      //                         padding: EdgeInsets.all(5.0),
-      //                         child: ClipRRect(
-      //                           borderRadius: BorderRadius.circular(10),
-      //                           // ignore: sized_box_for_whitespace
-      //                           child: Container(
-      //                               height: 5.0,
-      //                               child: Stack(
-      //                                 alignment: Alignment.center,
-      //                                 children: [
-      //                                   Column(
-      //                                     mainAxisAlignment:
-      //                                         MainAxisAlignment.center,
-      //                                     crossAxisAlignment:
-      //                                         CrossAxisAlignment.center,
-      //                                     children: <Widget>[
-      //                                       Container(
-      //                                         width: 40,
-      //                                         height: 40,
-      //                                         child: Image.asset(
-      //                                             'assets/images/widget-icons/' +
-      //                                                 listImageAdmin[indx]),
-      //                                       ),
-      //                                       SizedBox(height: 7),
-      //                                       Text(listTitle[indx],
-      //                                           textAlign: TextAlign.center,
-      //                                           style: TextStyle(
-      //                                               fontSize: 10,
-      //                                               fontWeight: FontWeight.bold,
-      //                                               color: Colors.purple[700])),
-      //                                     ],
-      //                                   ),
-      //                                   listTitle[indx].toLowerCase() ==
-      //                                               "approval penarikan dana" ||
-      //                                           listTitle[indx].toLowerCase() ==
-      //                                               "pembayaran"
-      //                                       ? dataPenarikan > 0 &&
-      //                                               listTitle[indx]
-      //                                                       .toLowerCase() ==
-      //                                                   "approval penarikan dana"
-      //                                           ? Align(
-      //                                               alignment:
-      //                                                   Alignment.topRight,
-      //                                               child: Label()
-      //                                                   .labelNotifikasi(
-      //                                                       label: dataPenarikan
-      //                                                           .toString()))
-      //                                           : dataPembayaran > 0 &&
-      //                                                   listTitle[indx]
-      //                                                           .toLowerCase() ==
-      //                                                       "pembayaran"
-      //                                               ? Align(
-      //                                                   alignment:
-      //                                                       Alignment.topRight,
-      //                                                   child: Label()
-      //                                                       .labelNotifikasi(
-      //                                                           label: dataPembayaran
-      //                                                               .toString()))
-      //                                               : SizedBox()
-      //                                      : SizedBox()
-      //                                 ],
-      //                               )),
-      //                         ),
-      //                       )),
-      //                     ])));
-      //           },
-      //         ));
-      //   },
-      //   shrinkWrap: true,
-      // ))
     ]);
   }
 }

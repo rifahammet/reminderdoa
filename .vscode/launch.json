@@ -5,18 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "katalogdoa",
+            "name": "reminderdoa",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "katalogdoa (profile mode)",
+            "name": "reminderdoa (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "katalogdoa (release mode)",
+            "name": "reminderdoa (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

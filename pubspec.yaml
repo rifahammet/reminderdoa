@@ -127,6 +127,7 @@ dependencies:
   firebase_messaging: ^12.0.2
   google_sign_in: ^5.4.1
   geocoding: ^2.0.4
+  flutter_phoenix: ^1.0.0
   # auto_start_flutter: ^0.1.0
   # android_autostart: any
   
