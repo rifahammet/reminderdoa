@@ -222,9 +222,13 @@ class DataTablet {
                             child: Padding(
                                 padding:
                                     EdgeInsets.only(left: 10.0, right: 10.0),
-                                child: isSeperateLine? Divider(
-                                  thickness: 1,
-                                ) : SizedBox(height: 10.0,)))
+                                child: isSeperateLine
+                                    ? Divider(
+                                        thickness: 1,
+                                      )
+                                    : SizedBox(
+                                        height: 10.0,
+                                      )))
                       ],
                     );
                   }),
@@ -272,102 +276,107 @@ class DataTablet {
         child: Center(
       child: newData.length > 0
           ? GestureDetector(
-              child: 
-              SingleChildScrollView(child: 
-              Column(children: [
-              ListView.builder(
-                  itemCount: newData == null ? 0 : newData.length,
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (BuildContext context, int index) {
-                    return Column(
-                      children: [
-                        GestureDetector(
-                            onTap: () {
-                              FocusScope.of(context).requestFocus(FocusNode());
-                              callBackView(index);
-                            },
-                            child: isCustom
-                                ? isiWidget(index)
-                                : isListUP
-                                    ? getListUpOnly(
-                                        callBackEdit: callBackEdit,
-                                        context: context,
-                                        index: index,
-                                        isiWidget: isiWidget,
-                                        warna: isAktifGantiWarna
-                                            ? int.parse(newData[index]
-                                                            [fieldGantiWarna]
-                                                        .toString()) ==
-                                                    paramGantiWarna
-                                                ? warna
-                                                : Colors.red
-                                            : warna,
-                                      )
-                                    : isDeleteOnly
-                                        ? getDeleteOnly(
-                                            callBackDelete: callBackDelete,
-                                            context: context,
-                                            filePNG: filePNG,
-                                            index: index,
-                                            isiWidget: isiWidget,
-                                            isNoDecoration: isNoDecoration,
-                                            warna: isAktifGantiWarna
-                                                ? int.parse(newData[index][
-                                                                fieldGantiWarna]
-                                                            .toString()) ==
-                                                        paramGantiWarna
-                                                    ? warna
-                                                    : Colors.red
-                                                : warna,
-                                            isAPI: isAPI,
-                                            isClosed: isClosed)
-                                        : isEditOnly
-                                            ? getEditOnly(
-                                                callBackEdit: callBackEdit,
-                                                context: context,
-                                                filePNG: filePNG,
-                                                index: index,
-                                                isiWidget: isiWidget,
-                                                isNoDecoration: isNoDecoration,
-                                                isClosed: isClosed,
-                                                warna: isAktifGantiWarna
-                                                    ? int.parse(newData[index][
-                                                                    fieldGantiWarna]
-                                                                .toString()) ==
-                                                            paramGantiWarna
-                                                        ? warna
-                                                        : Colors.red
-                                                    : warna)
-                                            : getDeleteEdit(
-                                                callBackDelete: callBackDelete,
-                                                callBackEdit: callBackEdit,
-                                                context: context,
-                                                filePNG: filePNG,
-                                                index: index,
-                                                isiWidget: isiWidget,
-                                                warna: isAktifGantiWarna
-                                                    ? int.parse(newData[index][
-                                                                    fieldGantiWarna]
-                                                                .toString()) ==
-                                                            paramGantiWarna
-                                                        ? warna
-                                                        : Colors.red
-                                                    : warna,
-                                                isAPI: isAPI,
-                                                isClosed: isClosed)),
-                        Visibility(
-                            visible: isNoDecoration,
-                            child: Padding(
-                                padding:
-                                    EdgeInsets.only(left: 10.0, right: 10.0),
-                                child: Divider(
-                                  thickness: 1,
-                                )))
-                      ],
-                    );
-                  })])),
+              child: SingleChildScrollView(
+                  child: Column(children: [
+                ListView.builder(
+                    itemCount: newData == null ? 0 : newData.length,
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (BuildContext context, int index) {
+                      return Column(
+                        children: [
+                          GestureDetector(
+                              onTap: () {
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
+                                callBackView(index);
+                              },
+                              child: isCustom
+                                  ? isiWidget(index)
+                                  : isListUP
+                                      ? getListUpOnly(
+                                          callBackEdit: callBackEdit,
+                                          context: context,
+                                          index: index,
+                                          isiWidget: isiWidget,
+                                          warna: isAktifGantiWarna
+                                              ? int.parse(newData[index]
+                                                              [fieldGantiWarna]
+                                                          .toString()) ==
+                                                      paramGantiWarna
+                                                  ? warna
+                                                  : Colors.red
+                                              : warna,
+                                        )
+                                      : isDeleteOnly
+                                          ? getDeleteOnly(
+                                              callBackDelete: callBackDelete,
+                                              context: context,
+                                              filePNG: filePNG,
+                                              index: index,
+                                              isiWidget: isiWidget,
+                                              isNoDecoration: isNoDecoration,
+                                              warna: isAktifGantiWarna
+                                                  ? int.parse(newData[index][
+                                                                  fieldGantiWarna]
+                                                              .toString()) ==
+                                                          paramGantiWarna
+                                                      ? warna
+                                                      : Colors.red
+                                                  : warna,
+                                              isAPI: isAPI,
+                                              isClosed: isClosed)
+                                          : isEditOnly
+                                              ? getEditOnly(
+                                                  callBackEdit: callBackEdit,
+                                                  context: context,
+                                                  filePNG: filePNG,
+                                                  index: index,
+                                                  isiWidget: isiWidget,
+                                                  isNoDecoration:
+                                                      isNoDecoration,
+                                                  isClosed: isClosed,
+                                                  warna: isAktifGantiWarna
+                                                      ? int.parse(newData[index]
+                                                                      [
+                                                                      fieldGantiWarna]
+                                                                  .toString()) ==
+                                                              paramGantiWarna
+                                                          ? warna
+                                                          : Colors.red
+                                                      : warna)
+                                              : getDeleteEdit(
+                                                  callBackDelete:
+                                                      callBackDelete,
+                                                  callBackEdit: callBackEdit,
+                                                  context: context,
+                                                  filePNG: filePNG,
+                                                  index: index,
+                                                  isiWidget: isiWidget,
+                                                  warna: isAktifGantiWarna
+                                                      ? int.parse(newData[index]
+                                                                      [
+                                                                      fieldGantiWarna]
+                                                                  .toString()) ==
+                                                              paramGantiWarna
+                                                          ? warna
+                                                          : Colors.red
+                                                      : warna,
+                                                  isAPI: isAPI,
+                                                  isClosed: isClosed)),
+                          Visibility(
+                              visible: isNoDecoration,
+                              child: Padding(
+                                  padding:
+                                      EdgeInsets.only(left: 10.0, right: 10.0),
+                                  child: Divider(
+                                    thickness: 1,
+                                  )))
+                        ],
+                      );
+                    })
+              ])),
               onTap: () {
                 if (!isKlik) {
                   FocusScope.of(context).requestFocus(FocusNode());
@@ -543,9 +552,9 @@ class DataTablet {
       isSingleClose}) {
     Widget wg = Container(
       margin: EdgeInsets.fromLTRB(
-          10, index == 0 ? 15 : 0, 10, isNoDecoration ? 0 : 15),
+          10, index == 0 ? 0 : 0, 10, isNoDecoration ? 0 : 15),
       padding: EdgeInsets.fromLTRB(
-          5, isNoDecoration ? 0 : 13, 5, isNoDecoration ? 0 : 13),
+          5, isNoDecoration ? 0 : 0, 5, isNoDecoration ? 0 : 13),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:doa/utils/api-utility.dart';
-import 'package:doa/utils/api.dart';
 import 'package:doa/utils/function.dart';
-import 'package:doa/utils/pref_manager.dart';
 import 'package:doa/widgets/bottomDbNavigation.dart';
 import 'package:doa/widgets/datatable.dart';
 import 'package:sweetalert/sweetalert.dart';
@@ -18,6 +16,7 @@ class _ListUpPropinsiDialogState extends State<ListUpPropinsiDialog> {
   List<dynamic>? newData;
   var bottomNavigationBarIndex = 0;
   int iPos = 1;
+
   int iPosMax = 0;
   bool isKlik = false;
   bool isMatikan = false;
@@ -34,10 +33,9 @@ class _ListUpPropinsiDialogState extends State<ListUpPropinsiDialog> {
               child: Text(value),
             ))
         .toList();
-    
+
     //Fungsi().listToDropDownMenuItem(_typeItems);
   }
-
 
   Future getDataKebun(
       {bool isPemilik = true,
@@ -49,13 +47,16 @@ class _ListUpPropinsiDialogState extends State<ListUpPropinsiDialog> {
     if (!isFirst) {
       return newData;
     }
-    if (isCount) {
-    }
-
+    if (isCount) {}
 
     ApiUtilities auth = new ApiUtilities();
     final dataPropinsi = auth.getGlobalParam(
-        namaApi: "propinsis", like: txtFilter.text.toString().trim()!=""? { "active": "1","concat_field": txtFilter.text}:{ "active": "1"}, startFrom: (iPos-1) * int.parse(_selectedType.toString()) , limit: _selectedType);
+        namaApi: "propinsis",
+        like: txtFilter.text.toString().trim() != ""
+            ? {"active": "1", "concat_field": txtFilter.text}
+            : {"active": "1"},
+        startFrom: (iPos - 1) * int.parse(_selectedType.toString()),
+        limit: _selectedType);
     //final dataPropinsi =  await Fungsi().fetchData(url: Api.BASE_URL+ "propinsi");
     return dataPropinsi;
   }
@@ -77,14 +78,11 @@ class _ListUpPropinsiDialogState extends State<ListUpPropinsiDialog> {
     iPos = 1;
     final x = await getDataKebun(isCount: true, ket: 'callBackButtonSearch');
     setState(() {
-      print(x.toString());
       newData = x;
     });
   }
 
-  callBackView(index) async {
-    
-  }
+  callBackView(index) async {}
 
   callBackEdit(index) async {
     Navigator.of(context).pop(newData![index]);
@@ -105,7 +103,9 @@ class _ListUpPropinsiDialogState extends State<ListUpPropinsiDialog> {
               fontSize: 12,
               fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 5,),
+        SizedBox(
+          height: 5,
+        ),
         Text(
           newData?[index]['prop_nama'],
           style: TextStyle(color: Colors.grey[700], fontSize: 12),
@@ -142,87 +142,87 @@ class _ListUpPropinsiDialogState extends State<ListUpPropinsiDialog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      //drawer: AppDrawer(),
-      appBar: AppBar(
-        backgroundColor: Colors.green[700],
-        title: const Text(
-          "List Up Propinsi",
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18),
+        resizeToAvoidBottomInset: false,
+        //drawer: AppDrawer(),
+        appBar: AppBar(
+          backgroundColor: Colors.green[700],
+          title: const Text(
+            "List Up Propinsi",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18),
+          ),
+          centerTitle: true,
+          bottom: PreferredSize(
+              child: Column(children: [
+                Container(
+                  color: Colors.orange[700],
+                  height: 4.0,
+                )
+              ]),
+              preferredSize: Size.fromHeight(4.0)),
         ),
-        centerTitle: true,
-        bottom: PreferredSize(
-            child: Column(children: [
-              Container(
-                color: Colors.orange[700],
-                height: 4.0,
-              )
-            ]),
-            preferredSize: Size.fromHeight(4.0)),
-      ),
+        body: Container(
+            color: Colors.grey[100],
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                    child: FutureBuilder(
+                        future: getDataKebun(isCount: true, isFirst: true),
+                        builder: (context, AsyncSnapshot snapshot) {
+                          if (snapshot.hasError) print(snapshot.error);
+                          var jmlData =
+                              snapshot.data?["data"]["total_data"] == null
+                                  ? 0
+                                  : snapshot.data?["data"]["total_data"];
+                          Fungsi fungsi = new Fungsi();
+                          iPosMax = fungsi.getIposMax(_selectedType, jmlData);
 
-      body: Container(
-          color: Colors.grey[100],
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                  child: FutureBuilder(
-                      future: getDataKebun(isCount: true, isFirst: true),
-                      builder: (context, AsyncSnapshot snapshot) {
-                        if (snapshot.hasError) print(snapshot.error);
-                        
-                          var jmlData = snapshot.data?["data"]["total_data"]==null ? 0 :snapshot.data?["data"]["total_data"];
-                        Fungsi fungsi = new Fungsi();
-                        iPosMax = fungsi.getIposMax(_selectedType, jmlData);
-                        
-                        //print();
-                        List<dynamic>? list = snapshot.data?["data"]["data"];
-                        if (list == null) {
-                          newData = [];
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else {
-                          newData = list;
-                          return Column(
-                            children: <Widget>[
-                              DataTablet().getSearchForm(context,
-                                  txtFilter: txtFilter,
-                                  returnComboBox: callBackComboBox,
-                                  // dropDownData: _dropDownType,
-                                  comboSelected: _selectedType,
-                                  returnButtonSearch: callBackButtonSearch),
-                              DataTablet().getListData(
-                                  context: context,
-                                  newData: newData,
-                                  callBackDelete: callBackDelete,
-                                  callBackEdit: callBackEdit,
-                                  callBackView: callBackView,
-                                  isiWidget: callBackIsiWidget,
-                                  isListUP: true,
-                                  isKlik: isKlik,
-                                  warna: Colors.green,
-                                  isAktifGantiWarna: true,
-                                  fieldGantiWarna: "active",
-                                  isAPI: true),
-                            ],
-                          );
-                        }
-                      }))
-            ],
-          )),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // var db = await openDB();
-          //editData(context, null, false, true, AppLocalizations.of(context));
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.green,
-      ),
-      bottomNavigationBar: BottomDbNavigationBarApp(
-          context, bottomNavigationBarIndex, callBack)
-    );
+                          //print();
+                          List<dynamic>? list = snapshot.data?["data"]["data"];
+                          if (list == null) {
+                            newData = [];
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else {
+                            newData = list;
+                            return Column(
+                              children: <Widget>[
+                                DataTablet().getSearchForm(context,
+                                    txtFilter: txtFilter,
+                                    returnComboBox: callBackComboBox,
+                                    // dropDownData: _dropDownType,
+                                    comboSelected: _selectedType,
+                                    returnButtonSearch: callBackButtonSearch),
+                                DataTablet().getListData(
+                                    context: context,
+                                    newData: newData,
+                                    callBackDelete: callBackDelete,
+                                    callBackEdit: callBackEdit,
+                                    callBackView: callBackView,
+                                    isiWidget: callBackIsiWidget,
+                                    isListUP: true,
+                                    isKlik: isKlik,
+                                    warna: Colors.green,
+                                    isAktifGantiWarna: true,
+                                    fieldGantiWarna: "active",
+                                    isAPI: true),
+                              ],
+                            );
+                          }
+                        }))
+              ],
+            )),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            // var db = await openDB();
+            //editData(context, null, false, true, AppLocalizations.of(context));
+          },
+          child: Icon(Icons.add),
+          backgroundColor: Colors.green,
+        ),
+        bottomNavigationBar: BottomDbNavigationBarApp(
+            context, bottomNavigationBarIndex, callBack));
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:doa/pages/listups/listup-notif.dart';
 import 'package:doa/utils/authentication.dart';
 import 'package:intl/intl.dart';
 import 'package:optimize_battery/optimize_battery.dart';
@@ -48,7 +49,7 @@ import 'package:sweetalert/sweetalert.dart';
 StreamSubscription<LocationData>? locationSubscription;
 String? selectedNotificationPayload;
 dynamic contek;
-
+int counter = 0;
 // late Position _currentPosition;
 // late String _currentAddress;
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
@@ -67,7 +68,8 @@ class DashboardPage extends StatefulWidget {
   _DashboardPageState createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage>
+    with WidgetsBindingObserver {
   late final FirebaseMessaging _messaging;
 
   // PushNotification? _notificationInfo;
@@ -165,7 +167,8 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     // initAutoStart();
-
+    WidgetsBinding.instance.addObserver(this);
+    
     _initLocationService();
     // Workmanager().initialize(
     //     callbackDispatcher, // The top level function, aka callbackDispatcher
@@ -235,10 +238,17 @@ class _DashboardPageState extends State<DashboardPage> {
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      getNotif();
+    }
+  }
+
   _getAddressFromLatLng(_currentPosition) async {
     try {
-      var now = new DateTime.now();
-      var formatter = new DateFormat('yyyy-MM-dd');
+      var now = DateTime.now();
+      var formatter = DateFormat('yyyy-MM-dd');
       String curdate = formatter.format(now);
       if (Prefs.getString('curdate') == '') {
         Prefs.setString('curdate', curdate);
@@ -291,6 +301,7 @@ class _DashboardPageState extends State<DashboardPage> {
             subscribeTopic(newTopic);
             print('Topic Updated!');
           }
+          Prefs.setString('curdate', curdate);
           print('Profile Updated!');
           dynamic newJadwal = await getJadwalSholat();
           setState(() {
@@ -409,7 +420,10 @@ class _DashboardPageState extends State<DashboardPage> {
       _messaging.unsubscribeFromTopic("sholat_" + Prefs.getString("kota_kode"));
       _messaging.unsubscribeFromTopic("imsak_" + Prefs.getString("kota_kode"));
     } else {
-      subscribeTopic(Prefs.getString("kota_kode"));
+      if(Prefs.getString("kota_kode")!=null){
+        subscribeTopic(Prefs.getString("kota_kode"));
+      }
+      
     }
 
     _messaging.getToken().then((token) => setState(() {
@@ -435,10 +449,14 @@ class _DashboardPageState extends State<DashboardPage> {
           .then((RemoteMessage? message) {
         String payload = message?.data['payload'];
         handleClickMessage(payload);
+        getNotif();
       });
 
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         debugPrint("Message Received From Message Listen!");
+        setState(() {
+          counter = counter + 1;
+        });
         NotificationForegroundService.showNotification(message);
       });
 
@@ -452,6 +470,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         print("onMessageOpenedApp: $message");
+        getNotif();
         NotificationService.showNotification(message);
       });
     } else {
@@ -515,31 +534,26 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  Future<dynamic> getData({bool isFirst = false}) async {
-    // if (!isFirst) {
-    // // if (!Prefs.getBool("isSaving")) {
-    //     return 'ada';
-    //   // } else {
-    //   //   Prefs.setBool("isSaving", false);
-    //   // }
-    // }
+  void getNotif() async {
+    var where = <dynamic, dynamic>{
+      "user_id": Prefs.getInt("userId"),
+      "click": 0
+    };
+    final dataNotif =
+        await ApiUtilities().getGlobalParam(namaApi: "usernotif", where: where);
+    setState(() {
+      counter = dataNotif?["isSuccess"] == false
+          ? 0
+          : dataNotif?["data"]["total_data"];
+    });
+  }
 
+  Future<dynamic> getData({bool isFirst = false}) async {
     if (!isFirst) {
       return newData;
     }
 
     isFirst = false;
-    // ApiUtilities auth = ApiUtilities();
-    // final dataPropinsi = await ApiUtilities().getGlobalParam(
-    //     namaApi: "masterdoa",
-    //     where: doaKategori.toLowerCase() == "favorit"
-    //         ? {"isfavorit": 1, "user_id": Prefs.getInt("userId")}
-    //         : {"isfavorit": 0},
-    //     like: txtFilter.text.toString().trim() != ""
-    //         ? {"concat_field": txtFilter.text}
-    //         : {},
-    //     startFrom: (iPos - 1) * int.parse(_selectedType.toString()),
-    //     limit: _selectedType);
 
     final dataPropinsi = await ApiUtilities().getGlobalParam(
         namaApi: "masterdoa",
@@ -559,13 +573,10 @@ class _DashboardPageState extends State<DashboardPage> {
             : {},
         startFrom: (iPos - 1) * int.parse(_selectedType.toString()),
         limit: _selectedType);
-    //print(txtFilter.text);
-    //print('data propinsi='+dataPropinsi.toString());
 
     return dataPropinsi?["isSuccess"] == false
         ? []
         : dataPropinsi?["data"]["data"];
-    // return  "ada";
   }
 
   textBoxOnChange(label, value) {}
@@ -707,6 +718,14 @@ class _DashboardPageState extends State<DashboardPage> {
         iPos = 1;
         _selectedType = value;
       });
+    }
+
+    onPressedInbox() async {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ListUpNotifDialog()),
+      );
+      getNotif();
     }
 
     callBackButtonSearch() async {
@@ -941,7 +960,7 @@ class _DashboardPageState extends State<DashboardPage> {
               return Column(children: [
                 Container(
                   width: MediaQuery.of(context).size.width,
-                  height: 70,
+                  height: 50,
                   color: Colors.transparent,
                   child: Row(
                     children: [
@@ -1126,16 +1145,79 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             child: SizedBox(
                 child: Padding(
-                    padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
+                    padding: EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 5.0),
                     child: Column(
                       children: [
-                        Text(
-                          "Daftar Doa",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
-                            color: Colors.red[900],
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                                child: Align(
+                                    alignment: Alignment.center,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 40),
+                                      child: Text(
+                                        "Daftar Doa",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 24,
+                                          color: Colors.red[900],
+                                        ),
+                                      ),
+                                    ))),
+                            Stack(
+                              children: <Widget>[
+                                MaterialButton(
+                                  minWidth: 55,
+                                  onPressed: onPressedInbox,
+                                  color: Colors.blue,
+                                  textColor: Colors.white,
+                                  child: Icon(
+                                    Icons.notification_important_rounded,
+                                    size: 24,
+                                  ),
+                                  padding: EdgeInsets.all(5),
+                                  shape: CircleBorder(),
+                                ),
+                                Positioned(
+                                  right: 2,
+                                  top: 2,
+                                  child: Container(
+                                    padding: EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.redAccent,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    constraints: BoxConstraints(
+                                      minWidth: 25,
+                                      minHeight: 25,
+                                    ),
+                                    child: Text(
+                                      '$counter',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+
+                            // SizedBox(
+                            //     width: 55,
+                            //     child: MaterialButton(
+                            //       onPressed: onPressedInbox,
+                            //       color: Colors.blue,
+                            //       textColor: Colors.white,
+                            //       child: Icon(
+                            //         Icons.notification_important_rounded,
+                            //         size: 24,
+                            //       ),
+                            //       padding: EdgeInsets.all(5),
+                            //       shape: CircleBorder(),
+                            //     )),
+                          ],
                         ),
                         Row(children: [
                           Expanded(
@@ -1149,7 +1231,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     color: Colors.yellow[50],
                                     borderRadius: BorderRadius.circular(30.0),
                                   ),
-                                  height: 40,
+                                  height: 35,
                                   child: Row(
                                     children: [
                                       Expanded(
@@ -1200,7 +1282,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 color: Colors.yellow[50],
                                 borderRadius: BorderRadius.circular(30.0),
                               ),
-                              height: 40,
+                              height: 35,
                               width: 170,
                               child: Row(
                                 children: [
@@ -1300,7 +1382,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   padding: EdgeInsets.only(bottom: 20),
                   child: Container(
                       width: MediaQuery.of(context).size.width - 40,
-                      padding: EdgeInsets.all(10.0),
+                      // padding: EdgeInsets.all(5.0),
                       //color: Colors.red,
                       decoration: BoxDecoration(
                         // border: Border.all(
@@ -1406,7 +1488,7 @@ void handleClickMessage(String? payload) async {
         final waktu = payload.toString().split(' ');
         var dataSave = <dynamic, dynamic>{
           "click": 1,
-          "clicked_date": new DateTime.now().toString().substring(0, 19)
+          "clicked_date": DateTime.now().toString().substring(0, 19)
         };
         // print("Debug : " + dataSave.toString());
         var where = <dynamic, dynamic>{
@@ -1428,7 +1510,7 @@ void handleClickMessage(String? payload) async {
 
         var dataSave = <dynamic, dynamic>{
           "click": 1,
-          "clicked_date": new DateTime.now().toString().substring(0, 19)
+          "clicked_date": DateTime.now().toString().substring(0, 19)
         };
         // print("Debug : " + dataSave.toString());
         var where = <dynamic, dynamic>{
@@ -1451,8 +1533,8 @@ void handleClickMessage(String? payload) async {
 void hanldeReceiveMessage(RemoteMessage message) async {
   SharedPreferences? _prefs;
   _prefs = await SharedPreferences.getInstance();
-  var now = new DateTime.now();
-  var formatter = new DateFormat('yyyy-MM-dd');
+  var now = DateTime.now();
+  var formatter = DateFormat('yyyy-MM-dd');
   String formattedDate = formatter.format(now);
 
   if (isNumeric(message.data['payload'])) {
@@ -1476,7 +1558,7 @@ void hanldeReceiveMessage(RemoteMessage message) async {
       if (isSukses) {
         var dataSave = <dynamic, dynamic>{
           "receive": 1,
-          "received_date": new DateTime.now().toString().substring(0, 19)
+          "received_date": DateTime.now().toString().substring(0, 19)
         };
         ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
       } else {
@@ -1494,9 +1576,9 @@ void hanldeReceiveMessage(RemoteMessage message) async {
       }
     } else if (message.data['payload'].toString().contains("Time")) {
       String waktu = "Time";
-      DateTime date = new DateFormat("yyyy-MM-dd")
+      DateTime date = DateFormat("yyyy-MM-dd")
           .parse(message.data['payload'].toString().substring(5, 15));
-      DateTime time = new DateFormat("HH:mm:ss")
+      DateTime time = DateFormat("HH:mm:ss")
           .parse(message.data['payload'].toString().substring(16));
       var where = <dynamic, dynamic>{
         "user_id": _prefs.getInt("userId"),
@@ -1513,10 +1595,10 @@ void hanldeReceiveMessage(RemoteMessage message) async {
       if (isSukses) {
         var dataSave = <dynamic, dynamic>{
           "receive": 1,
-          "received_date": new DateTime.now().toString().substring(0, 19)
+          "received_date": DateTime.now().toString().substring(0, 19)
         };
-        var formatter = new DateFormat('dd MMM');
-        var timeformater = new DateFormat('HH:mm');
+        var formatter = DateFormat('dd MMM');
+        var timeformater = DateFormat('HH:mm');
         ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
       } else {
         var dataSave = <dynamic, dynamic>{
@@ -1576,8 +1658,8 @@ class NotificationForegroundService {
   static Future showNotification(RemoteMessage message) async {
     SharedPreferences? _prefs;
     _prefs = await SharedPreferences.getInstance();
-    var now = new DateTime.now();
-    var formatter = new DateFormat('yyyy-MM-dd');
+    var now = DateTime.now();
+    var formatter = DateFormat('yyyy-MM-dd');
     String formattedDate = formatter.format(now);
     PushNotification notification =
         PushNotification(payload: "", title: "", body: "");
@@ -1610,7 +1692,7 @@ class NotificationForegroundService {
         if (isSukses) {
           var dataSave = <dynamic, dynamic>{
             "receive": 1,
-            "received_date": new DateTime.now().toString().substring(0, 19)
+            "received_date": DateTime.now().toString().substring(0, 19)
           };
           ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
           notification = PushNotification(
@@ -1632,9 +1714,9 @@ class NotificationForegroundService {
         }
       } else if (message.data['payload'].toString().contains("Time")) {
         String waktu = "Time";
-        DateTime date = new DateFormat("yyyy-MM-dd")
+        DateTime date = DateFormat("yyyy-MM-dd")
             .parse(message.data['payload'].toString().substring(5, 15));
-        DateTime time = new DateFormat("HH:mm:ss")
+        DateTime time = DateFormat("HH:mm:ss")
             .parse(message.data['payload'].toString().substring(16));
         var where = <dynamic, dynamic>{
           "user_id": _prefs.getInt("userId"),
@@ -1651,10 +1733,10 @@ class NotificationForegroundService {
         if (isSukses) {
           var dataSave = <dynamic, dynamic>{
             "receive": 1,
-            "received_date": new DateTime.now().toString().substring(0, 19)
+            "received_date": DateTime.now().toString().substring(0, 19)
           };
-          var formatter = new DateFormat('dd MMM');
-          var timeformater = new DateFormat('HH:mm');
+          var formatter = DateFormat('dd MMM');
+          var timeformater = DateFormat('HH:mm');
           ApiUtilities().updateData(dataSave, "userreminderlog", where: where);
           notification = PushNotification(
               payload: message.data['payload'],

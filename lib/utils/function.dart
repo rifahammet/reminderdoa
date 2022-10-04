@@ -11,22 +11,29 @@ import 'package:image/image.dart' as ImageProcess;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-class Fungsi{
-dynamic isVocal(str){
-var prefix = str.toString().substring(0,1).toString();
-var restPattern = r'[aiueoAIUEO]';
-var myRegExp = RegExp(RegExp.escape(prefix) + restPattern);
-var string = str;
-return !string.startsWith(myRegExp);
-}
 
-String format(n, {bool isInteger = true, mataUang = "Rp.", isMataUang = false, isDouble=true}) {
+class Fungsi {
+  dynamic isVocal(str) {
+    var prefix = str.toString().substring(0, 1).toString();
+    var restPattern = r'[aiueoAIUEO]';
+    var myRegExp = RegExp(RegExp.escape(prefix) + restPattern);
+    var string = str;
+    return !string.startsWith(myRegExp);
+  }
+
+  String format(n,
+      {bool isInteger = true,
+      mataUang = "Rp.",
+      isMataUang = false,
+      isDouble = true}) {
     if (isInteger) {
-      final formatter =  NumberFormat("#,###", "en_US");
-      return (isMataUang ? mataUang + " ":"")+formatter.format( isDouble? n : double.parse(n));
+      final formatter = NumberFormat("#,###", "en_US");
+      return (isMataUang ? mataUang + " " : "") +
+          formatter.format(isDouble ? n : double.parse(n));
     } else {
-      final formatter =  NumberFormat("#,###.00", "en_US");
-      return (isMataUang ? mataUang + " ":"")+formatter.format(isDouble? n : double.parse(n));
+      final formatter = NumberFormat("#,###.00", "en_US");
+      return (isMataUang ? mataUang + " " : "") +
+          formatter.format(isDouble ? n : double.parse(n));
     }
   }
 
@@ -44,8 +51,8 @@ String format(n, {bool isInteger = true, mataUang = "Rp.", isMataUang = false, i
     return null;
   }
 
-  bool StringToBool(data, {parameter ="1"}){
-    return data.toString().toLowerCase()==parameter;
+  bool StringToBool(data, {parameter = "1"}) {
+    return data.toString().toLowerCase() == parameter;
   }
 
   fmtDateDay(val) {
@@ -58,40 +65,44 @@ String format(n, {bool isInteger = true, mataUang = "Rp.", isMataUang = false, i
     return formatDate(todayDate, [yyyy, '-', mm, '-', dd]);
   }
 
-    fmtDateTimeDay(val) {
+  fmtDateTimeDay(val) {
     DateTime todayDate = DateTime.parse(val.toString());
-    return formatDate(todayDate, [dd, '-', mm, '-', yyyy, ' ',HH,':',nn,':',ss]);
+    return formatDate(
+        todayDate, [dd, '-', mm, '-', yyyy, ' ', HH, ':', nn, ':', ss]);
   }
 
-    fmtDateTimeYear(val) {
+  fmtDateTimeYear(val) {
     DateTime todayDate = DateTime.parse(val.toString());
-    return formatDate(todayDate, [yyyy, '-', mm, '-', dd, ' ',   HH,':',nn,':',ss]);
+    return formatDate(
+        todayDate, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss]);
   }
 
-  fmtDateTimeYearNow(){
-    return formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd  , ' ',   HH,':',nn,':',ss]);
+  fmtDateTimeYearNow() {
+    return formatDate(
+        DateTime.now(), [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss]);
   }
 
-      fmtDateTimeDayNow() {
-    return formatDate(DateTime.now(), [dd, '-', mm, '-', yyyy, ' ',HH,':',nn,':',ss]);
+  fmtDateTimeDayNow() {
+    return formatDate(
+        DateTime.now(), [dd, '-', mm, '-', yyyy, ' ', HH, ':', nn, ':', ss]);
   }
 
-    fmtDateYearNow(){
-    return formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd  ]);
+  fmtDateYearNow() {
+    return formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd]);
   }
 
-      fmtDateDayNow() {
+  fmtDateDayNow() {
     return formatDate(DateTime.now(), [dd, '-', mm, '-', yyyy]);
   }
 
-    double fmtStringToInt(val) {
+  double fmtStringToInt(val) {
     return double.parse(val.toString().replaceAll(",", ""));
   }
 
-   String? validateEmail(String value) {
+  String? validateEmail(String value) {
     Pattern pattern =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    RegExp regex =  RegExp(pattern.toString());
+    RegExp regex = RegExp(pattern.toString());
     if (!regex.hasMatch(value)) {
       return "Enter Valid Email";
     } else {
@@ -100,81 +111,80 @@ String format(n, {bool isInteger = true, mataUang = "Rp.", isMataUang = false, i
   }
 
   Future<dynamic> fetchData({String? url}) async {
-  final response = await http
-      .get(Uri.parse(url!));
+    final response = await http.get(Uri.parse(url!));
 
-  if (response.statusCode == 200) {
-    // If the server did return a 200 OK response,
-    // then parse the JSON.
-    return jsonDecode(response.body);
-  } else {
-    // If the server did not return a 200 OK response,
-    // then throw an exception.
-    throw Exception('Failed to load album');
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      return jsonDecode(response.body);
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load album');
+    }
   }
-}
 
-getIposMax(limit,jumlahData){
-  var n = int.parse (jumlahData.toString())/int.parse(limit.toString());
-  if(n > n.toInt()){
-   n= n+1;
+  getIposMax(limit, jumlahData) {
+    var n = int.parse(jumlahData.toString()) / int.parse(limit.toString());
+    if (n > n.toInt()) {
+      n = n + 1;
+    }
+    return n.toInt();
   }
-return n.toInt();
-}
 
-getPos(index, iPos, iPosMax) {
+  getPos(index, iPos, iPosMax) {
+    print('posisi=' + index.toString());
     switch (index) {
       case 0:
         {
           return 1;
         }
-      // ignore: dead_code
-      break;
+        // ignore: dead_code
+        break;
       case 1:
         {
           return iPos - 1 <= 0 ? 1 : iPos - 1;
         }
         // ignore: dead_code
-      break;
+        break;
       case 2:
         {
+          print('iPos=' + iPos.toString() + ' iPosMax =' + iPosMax.toString());
           return iPos + 1 > iPosMax ? iPosMax : iPos + 1;
         }
         // ignore: dead_code
-      break;
+        break;
       case 3:
         {
           return iPosMax;
         }
         // ignore: dead_code
-      break;
+        break;
     }
   }
 
+  convertListToMap(data) {
+    dynamic listModel;
+    for (Map i in data) {
+      listModel.add(i);
+    }
+    return listModel;
+  }
 
-convertListToMap(data){
-
-  dynamic listModel;
-  for(Map i in data){
-          listModel.add(i);
-        }
-        return listModel;
-}
-
-listToDropDownMenuItem(listData){
- return listData
+  listToDropDownMenuItem(listData) {
+    return listData
         .map((String value) => DropdownMenuItem<String>(
               value: value,
               child: Text(value),
             ))
         .toList();
-}
+  }
 
-String strToMD5(String input) {
-  return md5.convert(utf8.encode(input)).toString();
-}
+  String strToMD5(String input) {
+    return md5.convert(utf8.encode(input)).toString();
+  }
 
-Uint8List FileImageToImage(pickedImage) {
+  Uint8List FileImageToImage(pickedImage) {
     List<int> imageBytes = pickedImage.readAsBytesSync();
     String imageB64 = base64Encode(imageBytes);
     return Base64Decoder().convert(imageB64);
@@ -197,12 +207,14 @@ Uint8List FileImageToImage(pickedImage) {
     return base64Encode(data);
   }
 
-  dynamic findDataInArray({List<dynamic>? listData,field,data}){
-    return listData!.firstWhere((element)  => element[field] == data, orElse: () => null);
+  dynamic findDataInArray({List<dynamic>? listData, field, data}) {
+    return listData!
+        .firstWhere((element) => element[field] == data, orElse: () => null);
   }
 
-    Future<String> createFolder(String cow) async {
-    final dir = Directory((await getExternalStorageDirectory())!.path + '/$cow');
+  Future<String> createFolder(String cow) async {
+    final dir =
+        Directory((await getExternalStorageDirectory())!.path + '/$cow');
     var status = await Permission.storage.status;
     if (!status.isGranted) {
       await Permission.storage.request();
@@ -214,5 +226,4 @@ Uint8List FileImageToImage(pickedImage) {
       return dir.path;
     }
   }
-
 }

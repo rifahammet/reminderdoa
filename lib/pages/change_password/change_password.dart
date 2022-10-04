@@ -182,7 +182,7 @@ class ChangePasswordDialog {
       "isFirst": 0,
       "id": Prefs.getInt("userId")
     };
-    print(dataSave.toString());
+    //print(dataSave.toString());
     var where = <dynamic, dynamic>{"id": Prefs.getInt("userId")};
     void callBack(data) {
       SweetAlert.show(

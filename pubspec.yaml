@@ -118,7 +118,7 @@ dependencies:
   rxdart: ^0.27.5
   location: any
   # geocoding: any
-  geolocator: any
+  # geolocator: any
   # android_autostart: any
   optimize_battery: ^0.0.2
   shared_preferences: ^2.0.15
@@ -128,6 +128,7 @@ dependencies:
   google_sign_in: ^5.4.1
   geocoding: ^2.0.4
   flutter_phoenix: ^1.0.0
+  geolocator: ^9.0.1
   # auto_start_flutter: ^0.1.0
   # android_autostart: any
   

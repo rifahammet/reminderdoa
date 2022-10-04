@@ -105,6 +105,7 @@ _getAddressFromLatLng(BuildContext context, currentPosition) async {
     bool isSukses = dataDoa["isSuccess"] as bool;
     if (isSukses) {
       var record = dataDoa["data"]["data"][0];
+
       Prefs.setString("kota_nama", record['kota_nama']);
       Prefs.setString("kota_kode", record['kota_kode']);
       Prefs.setString("prop_kode", record['prop_kode']);
@@ -142,17 +143,19 @@ Future<bool> _initLocationService(BuildContext context) async {
 }
 
 void googleLogin(BuildContext context) async {
+
   bool isFirstLogged = false;
   var now = DateTime.now();
   var formatter = DateFormat('yyyy-MM-dd');
   String formattedDate = formatter.format(now);
-
+  // SweetAlert.show(context,
+  //     subtitle: "please_wait",
+  //     style: SweetAlertStyle.loading);
   User? user = await Authentication.signInWithGoogle(context: context);
-
+  // Navigator.pop(context);
   if (user != null) {
     String vPassword = randomAlphaNumeric(5);
     var data = <dynamic, dynamic>{"email": user.email, "isActive": 1};
-
     var dataUser =
         await ApiUtilities().getGlobalParam(namaApi: "alluser", where: data);
 
@@ -183,6 +186,7 @@ void googleLogin(BuildContext context) async {
           await ApiUtilities().getGlobalParam(namaApi: "alluser", where: data);
       isSukses = dataUser["isSuccess"] as bool;
     }
+
     if (isSukses) {
       var dataUserLogged = dataUser["data"]["data"][0];
       Prefs.setString("user_type", "user");
@@ -219,12 +223,22 @@ void googleLogin(BuildContext context) async {
             judulEmail: "Validasi Aplikasi Doa",
             callBack: callBackEmail);
       }
+      // Navigator.pop(contek);
       // Phoenix.rebirth(context);
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => UserInfoScreen(user: user),
         ),
       );
+      // Navigator.pop(context);
+      // Future.delayed(new Duration(seconds: 3), () {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (context) => UserInfoScreen(user: user),
+      //     ),
+      //   );
+      // });
     }
   }
 }

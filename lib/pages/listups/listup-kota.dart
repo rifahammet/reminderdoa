@@ -58,7 +58,6 @@ class _ListUpKotaDialogState extends State<ListUpKotaDialog> {
     final dataPropinsi = auth.getGlobalParam(
         namaApi: "kotas", like: txtFilter.text.toString().trim()!=""? { "active": "1","prop_kode": widget.propinsi_kode.toString(),"concat_field": txtFilter.text}:{ "active": "1","prop_kode": widget.propinsi_kode.toString()}, startFrom: (iPos-1) * int.parse(_selectedType.toString()) , limit: _selectedType);
     //final dataPropinsi =  await Fungsi().fetchData(url: Api.BASE_URL+ "propinsi");
-    print(dataPropinsi);
     return dataPropinsi;
   }
 
@@ -79,7 +78,6 @@ class _ListUpKotaDialogState extends State<ListUpKotaDialog> {
     iPos = 1;
     final x = await getDataKebun(isCount: true, ket: 'callBackButtonSearch');
     setState(() {
-      print(x.toString());
       newData = x;
     });
   }

@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:doa/utils/api.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:http/http.dart' as http;
-import 'package:doa/utils/email_util.dart';
 import 'package:sweetalert/sweetalert.dart';
 
 class ApiUtilities {
@@ -110,7 +109,7 @@ class ApiUtilities {
       }
     }
     */
-    //print('kondisi=' + datajson.toString());
+    // print('kondisi=' + datajson.toString());
     try {
       //print(Api.BASE_URL + namaApi);
       var resAccount = await http.post(Uri.parse(Api.BASE_URL + namaApi),
@@ -162,7 +161,7 @@ class ApiUtilities {
         'kode': 505,
         'isSuccess': false,
         'error': 'Error',
-        'error_message': 'Error System'
+        'error_message': 'Error System : ' + err.toString()
       };
     }
   }
@@ -236,7 +235,7 @@ class ApiUtilities {
         'kode': 505,
         'isSuccess': false,
         'error': 'Error',
-        'error_message': 'Error System'
+        'error_message': 'Error System : ' + err.toString()
       };
     }
   }
@@ -257,7 +256,7 @@ class ApiUtilities {
         datajson = {"where": json.encode(where)};
       }
     }
-    
+
     try {
       var resAccount = await http.post(Uri.parse(Api.BASE_URL + namaApi),
           headers: {
@@ -306,7 +305,7 @@ class ApiUtilities {
         'kode': 505,
         'isSuccess': false,
         'error': 'Error',
-        'error_message': 'Error System'
+        'error_message': 'Error System : ' + err.toString()
       };
     }
   }
@@ -380,7 +379,7 @@ class ApiUtilities {
         'kode': 505,
         'isSuccess': false,
         'error': 'Error',
-        'error_message': 'Error System'
+        'error_message': 'Error System : ' + err.toString()
       };
     }
   }
@@ -447,7 +446,7 @@ class ApiUtilities {
         'kode': 505,
         'isSuccess': false,
         'error': 'Error',
-        'error_message': 'Error System'
+        'error_message': 'Error System : ' + err.toString()
       };
     }
   }
@@ -537,7 +536,7 @@ class ApiUtilities {
         'kode': 505,
         'isSuccess': false,
         'error': 'Error',
-        'error_message': 'Error System'
+        'error_message': 'Error System : ' + err.toString()
       };
     }
   }
@@ -624,7 +623,7 @@ class ApiUtilities {
         'kode': 505,
         'isSuccess': false,
         'error': 'Error',
-        'error_message': 'Error System'
+        'error_message': 'Error System : ' + err.toString()
       };
     }
   }
@@ -711,7 +710,7 @@ class ApiUtilities {
         'kode': 505,
         'isSuccess': false,
         'error': 'Error',
-        'error_message': 'Error System'
+        'error_message': 'Error System : ' + err.toString()
       };
     }
   }
@@ -798,7 +797,7 @@ class ApiUtilities {
         'kode': 505,
         'isSuccess': false,
         'error': 'Error',
-        'error_message': 'Error System'
+        'error_message': 'Error System : ' + err.toString()
       };
     }
   }
@@ -1053,7 +1052,7 @@ class ApiUtilities {
         'kode': 505,
         'isSuccess': false,
         'error': 'Error',
-        'error_message': 'Error System'
+        'error_message': 'Error System : ' + err.toString()
       };
     }
   }
