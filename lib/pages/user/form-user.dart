@@ -279,16 +279,27 @@ class UserPageDialog {
                       height: 50,
                       padding: const EdgeInsets.fromLTRB(5, 3, 5, 3),
                       // ignore: deprecated_member_use
-                      child: RaisedButton(
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(15),
-                          ),
-                        ),
-                        elevation: 5,
-                        highlightElevation: 10,
-                        textColor: Colors.white,
-                        padding: const EdgeInsets.all(0.0),
+                      child: ElevatedButton(
+                        // shape: const RoundedRectangleBorder(
+                        //   borderRadius: BorderRadius.all(
+                        //     Radius.circular(15),
+                        //   ),
+                        // ),
+                        // elevation: 5,
+                        // highlightElevation: 10,
+                        // textColor: Colors.white,
+                        // padding: const EdgeInsets.all(0.0),
+                        style: ButtonStyle(
+    elevation: MaterialStateProperty.all(5),
+                      backgroundColor:
+                          MaterialStateProperty.all(Colors.transparent),
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(15.0),
+                    ),
+                  ),
+                  ),
+                      padding: MaterialStateProperty.all(EdgeInsets.all(0.0))),
                         child: Container(
                           width: MediaQuery.of(context).size.width,
                           alignment: Alignment.center,

@@ -164,16 +164,27 @@ class DatePicker {
            Container(
                     width: 100,
                     height: 130,
-                    child: RaisedButton(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(15),
-                        ),
-                      ),
-                      elevation: 5,
-                      highlightElevation: 10,
-                      textColor: Colors.white,
-                      padding: EdgeInsets.all(0.0),
+                    child: ElevatedButton(
+                      // shape: RoundedRectangleBorder(
+                      //   borderRadius: BorderRadius.all(
+                      //     Radius.circular(15),
+                      //   ),
+                      // ),
+                      // elevation: 5,
+                      // highlightElevation: 10,
+                      // textColor: Colors.white,
+                      // padding: EdgeInsets.all(0.0),
+                      style: ButtonStyle(
+    elevation: MaterialStateProperty.all(5),
+                      backgroundColor:
+                          MaterialStateProperty.all(Colors.transparent),
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(15.0),
+                    ),
+                  ),
+                  ),
+                      padding: MaterialStateProperty.all(EdgeInsets.all(0.0))),
                       child: Container(
                         width: MediaQuery.of(context).size.width,
                         alignment: Alignment.center,
@@ -306,16 +317,27 @@ class DatePicker {
                   child: Container(
                     height: 100,
                     padding: EdgeInsets.fromLTRB(5, 3, 5, 3),
-                    child: RaisedButton(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(15),
-                        ),
-                      ),
-                      elevation: 5,
-                      highlightElevation: 10,
-                      textColor: Colors.white,
-                      padding: EdgeInsets.all(0.0),
+                    child: ElevatedButton(
+                      // shape: RoundedRectangleBorder(
+                      //   borderRadius: BorderRadius.all(
+                      //     Radius.circular(15),
+                      //   ),
+                      // ),
+                      // elevation: 5,
+                      // highlightElevation: 10,
+                      // textColor: Colors.white,
+                      // padding: EdgeInsets.all(0.0),
+                      style: ButtonStyle(
+    elevation: MaterialStateProperty.all(5),
+                      backgroundColor:
+                          MaterialStateProperty.all(Colors.transparent),
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(15.0),
+                    ),
+                  ),
+                  ),
+                      padding: MaterialStateProperty.all(EdgeInsets.all(0.0))),
                       child: Container(
                         width: MediaQuery.of(context).size.width,
                         alignment: Alignment.center,

@@ -19,7 +19,7 @@ import 'package:doa/widgets/listup.dart';
 import 'package:doa/widgets/textbox.dart';
 import 'package:sweetalert/sweetalert.dart';
 
-class DoaDialog {
+class DoaDialogOld {
   GlobalKey<FormState>? _key;
   bool autoValidate = false;
   int id = 0;
@@ -38,8 +38,6 @@ class DoaDialog {
   final txtWaktuPagiController = TextEditingController();
   final txtWaktuSiangController = TextEditingController();
   final txtWaktuMalamController = TextEditingController();
-  final txtWaktuWeekdayController = TextEditingController();
-  final txtWaktuWeekendController = TextEditingController();
   final txtWaktuSeninController = TextEditingController();
   final txtWaktuSelasaController = TextEditingController();
   final txtWaktuRabuController = TextEditingController();
@@ -61,7 +59,7 @@ class DoaDialog {
 
   bool firstLoad = true;
   String? tanggalTransaksi;
-  bool isDisplaySholat = false;
+  bool isDisplaySholat = true;
   bool isDisplayRamadhan = false;
   bool isDisplayBatasWaktu = false;
   bool isDisplayHarian = false;
@@ -74,14 +72,12 @@ class DoaDialog {
 
   /* checkbox */
   bool cboSholat = false;
-  bool cboBuka = false;
+bool cboBuka = false;
   bool cboImsak = false;
   bool cboTanggal = false;
   bool cboPagi = false;
   bool cboSiang = false;
   bool cboMalam = false;
-  bool cboWeekday = false;
-  bool cboWeekend = false;
   bool cboSenin = false;
   bool cboSelasa = false;
   bool cboRabu = false;
@@ -178,21 +174,6 @@ class DoaDialog {
 
         callBackTimeWaktuMalam(data) {
           txtWaktuMalamController.text = data;
-        }
-
-        callBackTimeWeekday(data) {
-          txtWaktuWeekdayController.text = data;
-          txtWaktuSeninController.text = data;
-          txtWaktuSelasaController.text = data;
-          txtWaktuRabuController.text = data;
-          txtWaktuKamisController.text = data;
-          txtWaktuJumatController.text = data;
-        }
-
-        callBackTimeWeekend(data) {
-          txtWaktuWeekendController.text = data;
-          txtWaktuSabtuController.text = data;
-          txtWaktuMingguController.text = data;
         }
 
         callBackTimeHarianSenin(data) {
@@ -361,30 +342,11 @@ class DoaDialog {
               "time": txtWaktuMalamController.text
             });
           }
-          if (cboWeekday) {
-            arrData.add({
-              "user_id": userID,
-              "doa_id": data["id"],
-              //"isWeekday": 1,
-              "day": "Weekday",
-              "time": txtWaktuWeekdayController.text
-            });
-          }
-          if (cboWeekend) {
-            arrData.add({
-              "user_id": userID,
-              "doa_id": data["id"],
-              //"isWeekend": 1,
-              "day": "Weekend",
-              "time": txtWaktuWeekendController.text
-            });
-          }
           if (cboSenin) {
             arrData.add({
               "user_id": userID,
               "doa_id": data["id"],
               "isDaily": 1,
-              //"isWeekday": cboWeekday ? 1 : 0,
               "day": "Senin",
               "time": txtWaktuSeninController.text
             });
@@ -394,7 +356,6 @@ class DoaDialog {
               "user_id": userID,
               "doa_id": data["id"],
               "isDaily": 1,
-              //"isWeekday": cboWeekday ? 1 : 0,
               "day": "Selasa",
               "time": txtWaktuSelasaController.text
             });
@@ -404,7 +365,6 @@ class DoaDialog {
               "user_id": userID,
               "doa_id": data["id"],
               "isDaily": 1,
-              //"isWeekday": cboWeekday ? 1 : 0,
               "day": "Rabu",
               "time": txtWaktuRabuController.text
             });
@@ -414,7 +374,6 @@ class DoaDialog {
               "user_id": userID,
               "doa_id": data["id"],
               "isDaily": 1,
-              //"isWeekday": cboWeekday ? 1 : 0,
               "day": "Kamis",
               "time": txtWaktuKamisController.text
             });
@@ -424,7 +383,6 @@ class DoaDialog {
               "user_id": userID,
               "doa_id": data["id"],
               "isDaily": 1,
-              //"isWeekday": cboWeekday ? 1 : 0,
               "day": "Jumat",
               "time": txtWaktuJumatController.text
             });
@@ -434,7 +392,6 @@ class DoaDialog {
               "user_id": userID,
               "doa_id": data["id"],
               "isDaily": 1,
-              //"isWeekend": cboWeekend ? 1 : 0,
               "day": "Sabtu",
               "time": txtWaktuSabtuController.text
             });
@@ -444,7 +401,6 @@ class DoaDialog {
               "user_id": userID,
               "doa_id": data["id"],
               "isDaily": 1,
-              //"isWeekend": cboWeekend ? 1 : 0,
               "day": "Minggu",
               "time": txtWaktuMingguController.text
             });
@@ -540,10 +496,6 @@ class DoaDialog {
                                     formatDate(DateTime.now(), [HH, ':', nn]);
                                 txtWaktuMalamController.text =
                                     formatDate(DateTime.now(), [HH, ':', nn]);
-                                txtWaktuWeekdayController.text =
-                                    formatDate(DateTime.now(), [HH, ':', nn]);
-                                txtWaktuWeekendController.text =
-                                    formatDate(DateTime.now(), [HH, ':', nn]);
                                 txtWaktuSeninController.text =
                                     formatDate(DateTime.now(), [HH, ':', nn]);
                                 txtWaktuSelasaController.text =
@@ -568,15 +520,14 @@ class DoaDialog {
                                     }
                                     if (int.parse(vdata['isRamadhan']) == 1) {
                                       setState(() {
-                                        if (vdata['waktu'] == 'Imsak') {
-                                          cboImsak = true;
-                                        }
-                                        if (vdata['waktu'] == 'Berbuka') {
-                                          cboBuka = true;
-                                        }
+                                        cboImsak = true;
                                       });
                                     }
-
+                                    if (int.parse(vdata['isRamadhanBuka']) == 1) {
+                                      setState(() {
+                                        cboBuka = true;
+                                      });
+                                    }
                                     if (int.parse(vdata['isByDate']) == 1) {
                                       setState(() {
                                         cboTanggal = true;
@@ -592,26 +543,7 @@ class DoaDialog {
                                                 .substring(0, 5);
                                       });
                                     }
-                                    if (vdata['day'] == "Weekday" &&
-                                        int.parse(vdata['isDaily']) == 0) {
-                                      setState(() {
-                                        cboWeekday = true;
-                                        txtWaktuWeekdayController.text =
-                                            vdata['time']
-                                                .toString()
-                                                .substring(0, 5);
-                                      });
-                                    }
-                                    if (vdata['day'] == "Weekend" &&
-                                        int.parse(vdata['isDaily']) == 0) {
-                                      setState(() {
-                                        cboWeekend = true;
-                                        txtWaktuWeekendController.text =
-                                            vdata['time']
-                                                .toString()
-                                                .substring(0, 5);
-                                      });
-                                    }
+
                                     if (int.parse(vdata['isDaily']) == 1) {
                                       if (vdata['day'] == "Senin") {
                                         setState(() {
@@ -761,60 +693,6 @@ class DoaDialog {
                                 });
                               }
 
-                              cbOnChangeWeekday(val) {
-                                setState(() {
-                                  cboWeekday = val;
-                                  cboSenin = val;
-                                  cboSelasa = val;
-                                  cboRabu = val;
-                                  cboKamis = val;
-                                  cboJumat = val;
-                                  if (val == true) {
-                                    txtWaktuSeninController.text =
-                                        txtWaktuWeekdayController.text;
-                                    txtWaktuSelasaController.text =
-                                        txtWaktuWeekdayController.text;
-                                    txtWaktuRabuController.text =
-                                        txtWaktuWeekdayController.text;
-                                    txtWaktuKamisController.text =
-                                        txtWaktuWeekdayController.text;
-                                    txtWaktuJumatController.text =
-                                        txtWaktuWeekdayController.text;
-                                  } else {
-                                    txtWaktuSeninController.text =
-                                        formatDate(DateTime.now(), [HH, ':', nn]);
-                                    txtWaktuSelasaController.text =
-                                        formatDate(DateTime.now(), [HH, ':', nn]);
-                                    txtWaktuRabuController.text =
-                                        formatDate(DateTime.now(), [HH, ':', nn]);
-                                    txtWaktuKamisController.text =
-                                        formatDate(DateTime.now(), [HH, ':', nn]);
-                                    txtWaktuJumatController.text =
-                                        formatDate(DateTime.now(), [HH, ':', nn]);
-                                  }
-                                });
-                              }
-
-                              cbOnChangeWeekend(val) {
-                                setState(() {
-                                  cboWeekend = val;
-                                  cboSabtu = val;
-                                  cboMinggu = val;
-                                  if (val == true) {
-                                    txtWaktuSabtuController.text =
-                                        txtWaktuWeekendController.text;
-                                    txtWaktuMingguController.text =
-                                        txtWaktuWeekendController.text;
-                                    
-                                  } else {
-                                    txtWaktuSabtuController.text =
-                                        formatDate(DateTime.now(), [HH, ':', nn]);
-                                    txtWaktuMingguController.text =
-                                        formatDate(DateTime.now(), [HH, ':', nn]);
-                                  }
-                                });
-                              }
-
                               cbOnChangeSenin(val) {
                                 setState(() {
                                   cboSenin = val;
@@ -858,20 +736,16 @@ class DoaDialog {
                               }
 
                               callBackSholat(value) {
-                                //if (vExpandableMenu != "sholat") {
+                                if (vExpandableMenu != "sholat") {
                                   setState(() {
                                     vExpandableMenu = "sholat";
                                     isDisplaySholat = value;
-                                    // isDisplayTanggal = !value;
-                                    // isDisplayRamadhan = !value;
-                                    // isDisplayBatasWaktu = !value;
-                                    // isDisplayHarian = !value;
-                                    isDisplayTanggal = false;
-                                    isDisplayRamadhan = false;
-                                    isDisplayBatasWaktu = false;
-                                    isDisplayHarian = false;
+                                    isDisplayTanggal = !value;
+                                    isDisplayRamadhan = !value;
+                                    isDisplayBatasWaktu = !value;
+                                    isDisplayHarian = !value;
                                   });
-                                //}
+                                }
                               }
 
                               isiWidgetSholat() {
@@ -889,20 +763,16 @@ class DoaDialog {
                               }
 
                               callBackTanggal(value) {
-                                //if (vExpandableMenu != "tanggal") {
+                                if (vExpandableMenu != "tanggal") {
                                   setState(() {
                                     vExpandableMenu = "tanggal";
                                     isDisplayTanggal = value;
-                                    // isDisplaySholat = !value;
-                                    // isDisplayRamadhan = !value;
-                                    // isDisplayBatasWaktu = !value;
-                                    // isDisplayHarian = !value;
-                                    isDisplaySholat = false;
-                                    isDisplayRamadhan = false;
-                                    isDisplayBatasWaktu = false;
-                                    isDisplayHarian = false;
+                                    isDisplaySholat = !value;
+                                    isDisplayRamadhan = !value;
+                                    isDisplayBatasWaktu = !value;
+                                    isDisplayHarian = !value;
                                   });
-                                //}
+                                }
                               }
 
                               isiWidgetTanggal() {
@@ -949,20 +819,16 @@ class DoaDialog {
                               }
 
                               callBackRamadhan(value) {
-                                //if (vExpandableMenu != "ramadhan") {
+                                if (vExpandableMenu != "ramadhan") {
                                   setState(() {
                                     vExpandableMenu = "ramadhan";
                                     isDisplayRamadhan = value;
-                                    // isDisplaySholat = !value;
-                                    // isDisplayBatasWaktu = !value;
-                                    // isDisplayHarian = !value;
-                                    // isDisplayTanggal = !value;
-                                    isDisplaySholat = false;
-                                    isDisplayBatasWaktu = false;
-                                    isDisplayHarian = false;
-                                    isDisplayTanggal = false;
+                                    isDisplaySholat = !value;
+                                    isDisplayBatasWaktu = !value;
+                                    isDisplayHarian = !value;
+                                    isDisplayTanggal = !value;
                                   });
-                                //}
+                                }
                               }
 
                               isiWidgetRamadhan() {
@@ -1011,20 +877,16 @@ class DoaDialog {
                               }
 
                               callBackBatasWaktu(value) {
-                                //if (vExpandableMenu != "waktu") {
+                                if (vExpandableMenu != "waktu") {
                                   setState(() {
                                     vExpandableMenu = "waktu";
                                     isDisplayBatasWaktu = value;
-                                    // isDisplaySholat = !value;
-                                    // isDisplayRamadhan = !value;
-                                    // isDisplayHarian = !value;
-                                    // isDisplayTanggal = !value;
-                                    isDisplaySholat = false;
-                                    isDisplayRamadhan = false;
-                                    isDisplayHarian = false;
-                                    isDisplayTanggal = false;
+                                    isDisplaySholat = !value;
+                                    isDisplayRamadhan = !value;
+                                    isDisplayHarian = !value;
+                                    isDisplayTanggal = !value;
                                   });
-                                //}
+                                }
                               }
 
                               isiWidgetBatasWaktu() {
@@ -1093,20 +955,16 @@ class DoaDialog {
                               }
 
                               callBackHarian(value) {
-                                //if (vExpandableMenu != "harian") {
+                                if (vExpandableMenu != "harian") {
                                   setState(() {
                                     vExpandableMenu = "harian";
                                     isDisplayHarian = value;
-                                    // isDisplaySholat = !value;
-                                    // isDisplayRamadhan = !value;
-                                    // isDisplayBatasWaktu = !value;
-                                    // isDisplayTanggal = !value;
-                                    isDisplaySholat = false;
-                                    isDisplayRamadhan = false;
-                                    isDisplayBatasWaktu = false;
-                                    isDisplayTanggal = false;
+                                    isDisplaySholat = !value;
+                                    isDisplayRamadhan = !value;
+                                    isDisplayBatasWaktu = !value;
+                                    isDisplayTanggal = !value;
                                   });
-                                //}
+                                }
                               }
 
                               isiWidgetHarian() {
@@ -1114,42 +972,6 @@ class DoaDialog {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      Row(
-                                        children: [
-                                          CheckBox().checkBox(
-                                              lebars: 100,
-                                              checkBoxLabel: "Senin s/d Jumat",
-                                              boolValue: cboWeekday,
-                                              cbOnChage: cbOnChangeWeekday,
-                                              isUpDown: true),
-                                          Expanded(
-                                              child: TimePicker().datePickerBorder(
-                                                  context,
-                                                  label: "Waktu",
-                                                  textController:
-                                                      txtWaktuWeekdayController,
-                                                  fungsiCallback:
-                                                      callBackTimeWeekday))
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          CheckBox().checkBox(
-                                              lebars: 100,
-                                              checkBoxLabel: "Sabtu dan Ahad",
-                                              boolValue: cboWeekend,
-                                              cbOnChage: cbOnChangeWeekend,
-                                              isUpDown: true),
-                                          Expanded(
-                                              child: TimePicker().datePickerBorder(
-                                                  context,
-                                                  label: "Waktu",
-                                                  textController:
-                                                      txtWaktuWeekendController,
-                                                  fungsiCallback:
-                                                      callBackTimeWeekend))
-                                        ],
-                                      ),
                                       Padding(
                                           padding: EdgeInsets.only(top: 15),
                                           child: Row(
@@ -1297,7 +1119,7 @@ class DoaDialog {
                                     ),
                                     ExpandableMenu().expandableMenu(
                                         isDisplay: isDisplayBatasWaktu,
-                                        title: "Waktu Harian",
+                                        title: "Batas Waktu",
                                         isiWidget: isiWidgetBatasWaktu,
                                         callBack: callBackBatasWaktu,
                                         lebar:
@@ -1307,7 +1129,7 @@ class DoaDialog {
                                     ),
                                     ExpandableMenu().expandableMenu(
                                         isDisplay: isDisplayHarian,
-                                        title: "Waktu Mingguan",
+                                        title: "Harian",
                                         isiWidget: isiWidgetHarian,
                                         callBack: callBackHarian,
                                         lebar:
@@ -1317,7 +1139,7 @@ class DoaDialog {
                                     ),
                                     ExpandableMenu().expandableMenu(
                                         isDisplay: isDisplayTanggal,
-                                        title: "Tanggal Tertentu",
+                                        title: "Tanggal",
                                         isiWidget: isiWidgetTanggal,
                                         callBack: callBackTanggal,
                                         lebar:
@@ -1352,29 +1174,29 @@ class DoaDialog {
                                     },
                                     contek: context,
                                     isiwidget: showDialogWidget,
-                                    judul: "Setting Waktu Doa",
+                                    judul: "Setting Doa",
                                     onPressed: onPressedDialog,
                                     isExpanded: true,
-                                    labelButton: "Save");
+                                    labelButton: "Submit");
                               } else {
                                 ShowDialog().showDialogs(
                                     data: {"id": data, "data": []},
                                     contek: context,
                                     isiwidget: showDialogWidget,
-                                    judul: "Setting Waktu Doa",
+                                    judul: "Setting Doa",
                                     onPressed: onPressedDialog,
                                     isExpanded: true,
-                                    labelButton: "Save");
+                                    labelButton: "Submit");
                               }
                             } else {
                               ShowDialog().showDialogs(
                                   data: {"id": data, "data": []},
                                   contek: context,
                                   isiwidget: showDialogWidget,
-                                  judul: "Setting Waktu Doa",
+                                  judul: "Setting Doa",
                                   onPressed: onPressedDialog,
                                   isExpanded: true,
-                                  labelButton: "Save");
+                                  labelButton: "Submit");
                             }
                           },
                         ))
@@ -1575,18 +1397,16 @@ class DoaDialog {
                         // textColor: Colors.white,
                         // padding: const EdgeInsets.all(0.0),
                         style: ButtonStyle(
-                            elevation: MaterialStateProperty.all(5),
-                            backgroundColor:
-                                MaterialStateProperty.all(Colors.transparent),
-                            shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(15.0),
-                                ),
-                              ),
-                            ),
-                            padding:
-                                MaterialStateProperty.all(EdgeInsets.all(0.0))),
+    elevation: MaterialStateProperty.all(5),
+                      backgroundColor:
+                          MaterialStateProperty.all(Colors.transparent),
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(15.0),
+                    ),
+                  ),
+                  ),
+                      padding: MaterialStateProperty.all(EdgeInsets.all(0.0))),
                         child: Container(
                           width: MediaQuery.of(context).size.width,
                           alignment: Alignment.center,

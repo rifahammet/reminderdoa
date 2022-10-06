@@ -611,7 +611,7 @@ class TextBox {
                   extentOffset: inputBoxController.value.text.length);
             },
           )),
-          FlatButton(
+          ElevatedButton(
               onPressed: toggle(inputBoxName, _obscureText),
               child: Icon(
                 _obscureText ? Icons.visibility : Icons.visibility_off,
@@ -726,7 +726,7 @@ class TextBox {
               )),
               new SizedBox(
                   width: 50,
-                  child: FlatButton(
+                  child: ElevatedButton(
                       onPressed: () async {
                         toggle(_obscureText1);
                       },

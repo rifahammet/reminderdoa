@@ -129,6 +129,7 @@ dependencies:
   geocoding: ^2.0.4
   flutter_phoenix: ^1.0.0
   geolocator: ^9.0.1
+  url_launcher_web: ^2.0.13
   # auto_start_flutter: ^0.1.0
   # android_autostart: any
   

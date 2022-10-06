@@ -69,13 +69,19 @@ class ChangePasswordDialog {
                     padding: EdgeInsets.all(20),
                     color: Colors.white,
                     child: SingleChildScrollView(
-                                child: Column(
+                        child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        SizedBox(height: 200,width: 200,child:
-                        Container(child: Image.asset('assets/images/widget-icons/protection.png',
-                        fit: BoxFit.fill))),
-                        SizedBox(height: 40,),
+                        SizedBox(
+                            height: 200,
+                            width: 200,
+                            child: Container(
+                                child: Image.asset(
+                                    'assets/images/widget-icons/protection.png',
+                                    fit: BoxFit.fill))),
+                        SizedBox(
+                          height: 40,
+                        ),
                         TextBox().textBoxwithBorderConfirmedPasswordValidate(
                             confirmationPasswordController: txtConfirmation,
                             newPasswordController: txtNewPassword,
@@ -97,16 +103,27 @@ class ChangePasswordDialog {
                   child: Container(
                 height: 50,
                 padding: EdgeInsets.fromLTRB(5, 3, 5, 3),
-                child: RaisedButton(
-                  shape: RoundedRectangleBorder(
+                child: ElevatedButton(
+                  // shape: RoundedRectangleBorder(
+                  //   borderRadius: BorderRadius.all(
+                  //     Radius.circular(15),
+                  //   ),
+                  // ),
+                  // elevation: 5,
+                  // highlightElevation: 10,
+                  // textColor: Colors.white,
+                  // padding: EdgeInsets.all(0.0),
+                  style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all(Colors.transparent),
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(
                       Radius.circular(15),
                     ),
                   ),
-                  elevation: 5,
-                  highlightElevation: 10,
-                  textColor: Colors.white,
-                  padding: EdgeInsets.all(0.0),
+                  ),
+                      padding: MaterialStateProperty.all(EdgeInsets.all(0.0))),
+
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     alignment: Alignment.center,
@@ -159,9 +176,9 @@ class ChangePasswordDialog {
                           style: SweetAlertStyle.loadingerror,
                         );
                         Future.delayed(const Duration(seconds: 3), () {
-                            setState(() {});
-                            Navigator.pop(context);
-                          });
+                          setState(() {});
+                          Navigator.pop(context);
+                        });
                       }
                     } else {
                       setState(() {
@@ -194,12 +211,11 @@ class ChangePasswordDialog {
         setState(() {});
         Navigator.pop(context);
         Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardPage()),
-        (Route<dynamic> route) => false,
-      );
+          context,
+          MaterialPageRoute(builder: (context) => DashboardPage()),
+          (Route<dynamic> route) => false,
+        );
       });
-      
     }
 
     ApiUtilities().saveUpdateData(
