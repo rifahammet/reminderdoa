@@ -1256,7 +1256,7 @@ class _DashboardPageState extends State<DashboardPage>
                                               listPopupMenuItem:
                                                   listPopDoaKategori,
                                               posisi: "kanan",
-                                              x: 0.0,
+                                              x: -1*(MediaQuery.of(context).size.width/2)+85,
                                               y: 95.0,
                                               callBackSelected:
                                                   callBackSelectedDoaKategori,
